@@ -1,0 +1,1256 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#14213D">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kelime Kartları">
+<meta name="application-name" content="Kelime Kartları">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+<link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
+<title>Kelime Kartları</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page-top:#AFC3E8; --page:#D6E1F4; --panel:#FFFFFF; --ink:#14213D; --ink-2:#3F4A69; --edge:#14213D; --track:#D9DEEE;
+  --hl:#FFD23F; --hl-ink:#14213D;
+  --front:#FFFFFF; --front-ink:#14213D;
+  --back:#14213D; --back-ink:#FFD23F; --back-ink-2:#B7C0DC;
+  --known:#0E8A5F; --known-deep:#08573B; --known-fg:#FFFFFF;
+  --unknown:#C4204A; --unknown-soft:#FBDFE7;
+  --partial:#E08A00;
+  --font-display:'Bricolage Grotesque','Avenir Next','Segoe UI',system-ui,-apple-system,sans-serif;
+  --font-body:'DM Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --page-top:#050914; --page:#0C1221; --panel:#151E38; --ink:#EDF0FA; --ink-2:#9EABCB; --edge:#5B6DAA; --track:#28345C;
+    --front:#182244; --front-ink:#F1F3FC;
+    --back:#FFD23F; --back-ink:#14213D; --back-ink-2:#4B4210;
+    --known:#37D39B; --known-deep:#1E8F6B; --known-fg:#062A1E;
+    --unknown:#FF7C98; --unknown-soft:#4A1C2C;
+    --partial:#F5B24B;
+  }
+}
+:root[data-theme="dark"]{
+  --page-top:#050914; --page:#0C1221; --panel:#151E38; --ink:#EDF0FA; --ink-2:#9EABCB; --edge:#5B6DAA; --track:#28345C;
+  --front:#182244; --front-ink:#F1F3FC;
+  --back:#FFD23F; --back-ink:#14213D; --back-ink-2:#4B4210;
+  --known:#37D39B; --known-deep:#1E8F6B; --known-fg:#062A1E;
+  --unknown:#FF7C98; --unknown-soft:#4A1C2C;
+  --partial:#F5B24B;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;min-height:100%;background:var(--page);background-image:linear-gradient(180deg,var(--page-top) 0%,var(--page) 70%);background-repeat:no-repeat;color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.4;-webkit-text-size-adjust:100%;overscroll-behavior-y:none}
+[hidden]{display:none !important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+button, input, select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--known);outline-offset:3px}
+
+#snow{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.app{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:12px 14px 32px}
+
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+h1{margin:0;font-family:var(--font-display);font-weight:800;font-size:23px;line-height:1.1;letter-spacing:-.02em}
+.icon{display:grid;place-items:center;width:42px;height:42px;padding:0;border:2px solid var(--edge);border-radius:12px;background:var(--panel);cursor:pointer}
+.icon svg{width:22px;height:22px}
+.icon[aria-expanded="true"]{background:var(--ink);color:var(--page)}
+.back-link{display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:6px 10px 6px 6px;border:2px solid var(--edge);border-radius:12px;background:var(--panel);font-weight:700;font-size:14.5px;cursor:pointer}
+.back-link svg{width:19px;height:19px}
+
+.auto-btn{display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:6px 12px;border:2px solid var(--edge);border-radius:12px;background:var(--panel);font-weight:700;font-size:13.5px;cursor:pointer;color:var(--ink)}
+.auto-btn.active{background:var(--hl);color:var(--hl-ink);border-color:var(--edge)}
+.auto-btn svg{width:18px;height:18px}
+
+.decks{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.deck{min-height:38px;padding:6px;border:2px solid var(--edge);border-radius:12px;background:var(--panel);font-family:var(--font-display);font-weight:700;font-size:14.5px;cursor:pointer}
+.deck[aria-pressed="true"]{background:var(--ink);color:var(--page)}
+
+.pathhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:14px}
+.pathhead h2{margin:0;font-family:var(--font-display);font-weight:800;font-size:17px}
+.pathhead span{font-size:13px;color:var(--ink-2);font-weight:600}
+.legend{display:flex;gap:12px;margin-top:6px;font-size:12px;color:var(--ink-2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle;border:2px solid var(--edge)}
+.legend i.done{background:var(--known)}
+.legend i.partial{background:var(--partial)}
+.legend i.new{background:var(--panel)}
+
+.path-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}
+.day{position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border:2px solid var(--edge);border-radius:14px;background:var(--panel);font-family:var(--font-display);font-weight:700;cursor:pointer}
+.day b{font-size:16px;line-height:1}
+.day small{font-size:9.5px;font-weight:600;color:var(--ink-2)}
+.day.done{background:var(--known);border-color:var(--known-deep);color:var(--known-fg)}
+.day.done small{color:var(--known-fg);opacity:.85}
+.day.partial{background:var(--partial);border-color:var(--edge);color:var(--hl-ink)}
+.day.next{box-shadow:0 0 0 3px var(--hl)}
+.day .dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--unknown)}
+
+.pagination{display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:8px}
+.page-btn{min-height:36px;padding:6px 14px;border:2px solid var(--edge);border-radius:10px;background:var(--panel);font-weight:700;font-size:13px;cursor:pointer}
+.page-btn:disabled{opacity:0.4;cursor:default}
+.page-info{font-size:13px;font-weight:700;color:var(--ink-2)}
+
+.quicklinks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.qlink{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:52px;padding:9px 12px;border:2px solid var(--edge);border-radius:14px;background:var(--panel);font-weight:700;font-size:14px;cursor:pointer;text-align:left}
+.qlink em{display:block;font-style:normal;font-weight:800;font-size:19px;font-family:var(--font-display)}
+.qlink small{display:block;font-weight:600;color:var(--ink-2);font-size:12px}
+
+.status{margin-top:14px;padding:9px 11px;border:2px solid var(--edge);border-radius:14px;background:var(--panel);display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--ink-2)}
+.status strong{color:var(--ink);font-weight:700}
+.warn{margin-top:8px;font-size:12.5px;color:var(--ink-2)}
+.installhint{margin-top:10px;padding:10px 12px;border:2px dashed var(--edge);border-radius:14px;font-size:13px;color:var(--ink-2);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.installhint button{min-height:36px;padding:6px 12px;border:2px solid var(--edge);border-radius:10px;background:var(--ink);color:var(--page);font-weight:700;cursor:pointer;white-space:nowrap}
+
+.studyhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 4px}
+.studytitle{font-family:var(--font-display);font-weight:800;font-size:16px}
+.sbar{height:10px;margin-top:8px;overflow:hidden;border:2px solid var(--edge);border-radius:99px;background:var(--track)}
+.sbar>i{display:block;height:100%;width:0;background:var(--hl);transition:width .35s ease}
+
+.toast{margin:12px 0 0;padding:9px 12px;border:2px solid var(--edge);border-radius:12px;background:var(--hl);color:var(--hl-ink);font-weight:700;font-size:14px}
+
+.stage{position:relative;height:clamp(230px,36vh,320px);margin-top:12px;touch-action:pan-y;-webkit-user-select:none;user-select:none;will-change:transform}
+.stage.enter{animation:enter .18s ease-out}
+@keyframes enter{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+.stage[data-drag="k"] .face{border-color:var(--known)}
+.stage[data-drag="u"] .face{border-color:var(--unknown)}
+.tag{position:absolute;top:48px;z-index:3;padding:4px 10px;border:3px solid;border-radius:10px;background:var(--panel);font-family:var(--font-display);font-weight:800;font-size:17px;pointer-events:none;opacity:0}
+.tag-k{left:12px;color:var(--known);border-color:var(--known);transform:rotate(-8deg);opacity:var(--pk,0)}
+.tag-u{right:12px;color:var(--unknown);border-color:var(--unknown);transform:rotate(8deg);opacity:var(--pu,0)}
+
+.card{position:absolute;inset:0 0 7px 0;perspective:1400px;cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:24px}
+.inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.25,.8,.25,1)}
+.card.flipped .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;display:flex;flex-direction:column;padding:8px 12px 10px;overflow:hidden;border:2px solid var(--edge);border-radius:22px;box-shadow:0 5px 0 var(--edge);-webkit-backface-visibility:hidden;backface-visibility:hidden}
+.front{background:var(--front);color:var(--front-ink)}
+.back{background:var(--back);color:var(--back-ink);transform:rotateY(180deg)}
+
+.topline{display:flex;align-items:center;gap:8px;min-height:36px;font-size:13px}
+.meta{opacity:.75}
+.meta b{font-weight:700}
+.spacer{flex:1}
+.chip{padding:1px 8px;border-radius:99px;border:2px solid currentColor;font-size:12px;font-weight:700}
+.chip-k{color:var(--known)}
+.chip-u{color:var(--unknown)}
+.back .chip-k,.back .chip-u{color:var(--back-ink)}
+.speak{display:grid;place-items:center;width:36px;height:36px;padding:0;border:2px solid currentColor;border-radius:50%;background:transparent;cursor:pointer}
+.speak svg{width:18px;height:18px}
+.speak:focus-visible{outline-color:var(--hl)}
+
+.center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 4px 4px;text-align:center}
+.word{margin:0;font-family:var(--font-display);font-weight:800;line-height:1.22;letter-spacing:-.015em;overflow-wrap:anywhere}
+.word[data-size="xl"]{font-size:clamp(36px,11.5vw,58px)}
+.word[data-size="lg"]{font-size:clamp(29px,9vw,44px)}
+.word[data-size="md"]{font-size:clamp(24px,7.4vw,34px)}
+.word[data-size="sm"]{font-size:clamp(20px,6vw,26px)}
+.mark{padding:.02em .22em;border-radius:.18em;background:var(--hl);color:var(--hl-ink);-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.was{margin:0;font-size:14px;color:var(--back-ink-2)}
+.example-box{margin-top:6px;font-size:12.5px;font-style:italic;opacity:0.85;border-top:1px solid rgba(255,255,255,0.2);padding-top:4px}
+.hint{margin:0;text-align:center;font-size:12.5px;opacity:.65}
+
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;border:2px solid;border-radius:16px;font-family:var(--font-display);font-weight:700;font-size:17px;cursor:pointer;transition:transform .08s,box-shadow .08s}
+.btn svg{width:20px;height:20px}
+.btn:active{transform:translateY(3px)}
+.btn-u{background:var(--unknown-soft);color:var(--unknown);border-color:var(--unknown);box-shadow:0 4px 0 var(--unknown)}
+.btn-u:active{box-shadow:0 1px 0 var(--unknown)}
+.btn-k{background:var(--known);color:var(--known-fg);border-color:var(--known-deep);box-shadow:0 4px 0 var(--known-deep)}
+.btn-k:active{box-shadow:0 1px 0 var(--known-deep)}
+
+.metaline{display:flex;justify-content:space-between;align-items:center;min-height:38px;margin-top:6px;font-size:13.5px;color:var(--ink-2)}
+.link{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:4px 8px;border:0;border-radius:10px;background:transparent;cursor:pointer;font-weight:600}
+.link svg{width:17px;height:17px}
+.link:disabled{opacity:.4;cursor:default}
+
+.done{margin-top:12px;padding:24px 18px;text-align:center;border:2px solid var(--edge);border-radius:22px;background:var(--panel);box-shadow:0 5px 0 var(--edge)}
+.done h2{margin:0 0 6px;font-family:var(--font-display);font-weight:800;font-size:22px;line-height:1.2}
+.done p{margin:0 0 16px;color:var(--ink-2)}
+.done .stack{display:grid;gap:10px}
+.solid{width:100%;min-height:50px;padding:10px 16px;border:2px solid var(--edge);border-radius:14px;background:var(--ink);color:var(--page);font-weight:700;cursor:pointer}
+.plain{width:100%;min-height:48px;padding:10px 16px;border:2px solid var(--edge);border-radius:14px;background:transparent;font-weight:600;cursor:pointer}
+
+.settings{display:grid;gap:14px;margin-top:12px;padding:14px;border:2px solid var(--edge);border-radius:18px;background:var(--panel)}
+.howto{margin:0;font-size:13.5px;color:var(--ink-2)}
+.row{display:grid;gap:6px}
+.row>span{font-size:13.5px;font-weight:700}
+.segs{display:flex;flex-wrap:wrap;gap:6px}
+.seg{flex:1 1 auto;min-height:42px;padding:6px 10px;border:2px solid var(--edge);border-radius:11px;background:transparent;font-size:14.5px;font-weight:500;cursor:pointer}
+.seg[aria-pressed="true"]{background:var(--ink);color:var(--page);font-weight:700}
+.note{margin:0;font-size:13px;color:var(--ink-2)}
+.field{display:flex;align-items:center;gap:10px;font-size:14px}
+.field input, .field select{min-height:42px;padding:6px 10px;border:2px solid var(--edge);border-radius:11px;background:transparent;color:var(--ink);font:inherit}
+.field input[type="number"]{width:92px}
+.field input[type="text"]{flex:1}
+.reset{justify-self:start;min-height:42px;padding:6px 14px;border:2px solid var(--unknown);border-radius:11px;background:transparent;color:var(--unknown);font-weight:700;cursor:pointer}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none !important;animation:none !important}
+}
+@media (display-mode:standalone){
+  .installhint{display:none !important}
+}
+</style>
+</head>
+<body>
+<canvas id="snow" aria-hidden="true"></canvas>
+<div class="app">
+  <header class="head">
+    <h1>Kelime Kartları</h1>
+    <button class="icon" id="gear" type="button" aria-expanded="false" aria-controls="settings" aria-label="Ayarlar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h9m4 0h3M4 12h3m4 0h9M4 17h11m4 0h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <section id="pathScreen">
+      <div class="decks" role="group" aria-label="Deste seç">
+        <button class="deck" id="deck1" data-key="deck" data-value="1" aria-pressed="false">Level 1</button>
+        <button class="deck" id="deck2" data-key="deck" data-value="2" aria-pressed="false">Level 2</button>
+        <button class="deck" id="deckAll" data-key="deck" data-value="all" aria-pressed="false">Hepsi</button>
+      </div>
+
+      <div class="pathhead">
+        <h2>Günler</h2>
+        <span id="pathSummary"></span>
+      </div>
+      <div class="legend">
+        <span><i class="done"></i>Tamamlandı</span>
+        <span><i class="partial"></i>Devam ediyor</span>
+        <span><i class="new"></i>Başlanmadı</span>
+      </div>
+      <div class="path-grid" id="pathGrid" role="group" aria-label="Gün listesi"></div>
+
+      <div class="pagination" id="pathPagination">
+        <button class="page-btn" id="prevPageBtn" type="button">Önceki</button>
+        <span class="page-info" id="pageInfoText">Sayfa 1 / 1</span>
+        <button class="page-btn" id="nextPageBtn" type="button">Sonraki</button>
+      </div>
+
+      <div class="quicklinks">
+        <button class="qlink" id="goKnown" type="button"><span><em id="knownBig">0</em><small>Bildiklerim</small></span></button>
+        <button class="qlink" id="goUnknown" type="button"><span><em id="unknownBig">0</em><small>Bilmediklerim</small></span></button>
+      </div>
+
+      <div class="status">
+        <span>Bu destede <strong id="tCount">0</strong> kelime var</span>
+        <span>Öğrenilen <strong id="kCount">0</strong></span>
+      </div>
+      <p class="warn" id="noStore" hidden>Bu tarayıcı ilerlemeyi kaydetmeye izin vermiyor. Sayfayı kapatırsan işaretlerin silinir.</p>
+      <div class="installhint" id="installHint" hidden>
+        <span>Bunu telefonunda uygulama gibi kullan.</span>
+        <button id="installBtn" type="button">Yükle</button>
+      </div>
+    </section>
+
+    <section id="study" hidden>
+      <div class="studyhead">
+        <button class="back-link" id="backToPath" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+          Yol
+        </button>
+        <span class="studytitle" id="studyTitle"></span>
+        <button class="auto-btn" id="autoPlayBtn" type="button" aria-label="Otomatik Oynat / Dinle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" id="autoPlayIcon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <span id="autoPlayLabel">Dinle</span>
+        </button>
+      </div>
+      <div class="sbar" role="progressbar" id="sbar" aria-label="Bu oturumdaki ilerleme" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="sFill"></i></div>
+
+      <p class="toast" id="toast" role="status" hidden></p>
+
+      <div id="studyBody">
+        <div class="stage" id="stage" data-drag="">
+          <span class="tag tag-k" aria-hidden="true">Biliyorum</span>
+          <span class="tag tag-u" aria-hidden="true">Bilmiyorum</span>
+          <div class="card" id="card" role="button" tabindex="0" aria-label="Kartı çevir">
+            <div class="inner" id="inner">
+              <div class="face front">
+                <div class="topline">
+                  <span class="meta"><span id="fLvl"></span> <b id="fNum"></b></span>
+                  <span class="spacer"></span>
+                  <span class="chip" id="fChip" hidden></span>
+                  <button class="speak" id="fSpeak" type="button" aria-label="İngilizce okunuşu dinle" hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+                  </button>
+                </div>
+                <div class="center"><h2 class="word" id="fWord"><span class="mark" id="fMark"></span></h2></div>
+                <p class="hint">Çevirmek için dokun</p>
+              </div>
+              <div class="face back" aria-hidden="true" id="backFace">
+                <div class="topline">
+                  <span class="meta"><span id="bLvl"></span> <b id="bNum"></b></span>
+                  <span class="spacer"></span>
+                  <span class="chip" id="bChip" hidden></span>
+                  <button class="speak" id="bSpeak" type="button" aria-label="İngilizce okunuşu dinle" hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+                  </button>
+                </div>
+                <div class="center">
+                  <p class="was" id="bWas"></p>
+                  <h2 class="word" id="bWord"></h2>
+                  <div class="example-box" id="bExample" hidden></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-u" id="btnU" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            Bilmiyorum
+          </button>
+          <button class="btn btn-k" id="btnK" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+            Biliyorum
+          </button>
+        </div>
+        <div class="metaline">
+          <span id="left">Sırada 0 kart</span>
+          <button class="link" id="undo" type="button" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>
+            Geri al
+          </button>
+        </div>
+      </div>
+
+      <section class="done" id="done" hidden>
+        <h2 id="doneTitle"></h2>
+        <p id="doneText"></p>
+        <div class="stack">
+          <button class="solid" id="doneRepeat" type="button">Günü Tekrar Et</button>
+          <button class="solid" id="doneNext" type="button" hidden></button>
+          <button class="plain" id="doneAll" type="button"></button>
+        </div>
+      </section>
+    </section>
+
+    <section class="settings" id="settings" aria-label="Ayarlar" hidden>
+      <p class="howto">Kartı çevirmek için dokun. Sağa kaydırırsan “Biliyorum”, sola kaydırırsan “Bilmiyorum” olur. Her kart bir kez sorulur, bilmediklerin ayrı listede birikir.</p>
+
+      <div class="row">
+        <span>➕ Yeni Kelime Ekle</span>
+        <label class="field">
+          Level:
+          <select id="addWordLvl">
+            <option value="1">Level 1</option>
+            <option value="2">Level 2</option>
+          </select>
+        </label>
+        <label class="field"><input id="addWordEn" type="text" placeholder="İngilizce (örn: Apple)"></label>
+        <label class="field"><input id="addWordTr" type="text" placeholder="Türkçe (örn: Elma)"></label>
+        <label class="field"><input id="addWordEx" type="text" placeholder="Örnek Cümle (opsiyonel)"></label>
+        <button class="solid" id="addWordBtn" type="button" style="min-height:42px;margin-top:4px">Kelimeyi Kaydet</button>
+      </div>
+
+      <div class="row">
+        <span>🎧 Dinleme Modu (Otomatik Oynatma)</span>
+        <label class="field">
+          Okuma Hızı:
+          <select id="autoSpeed">
+            <option value="0.5">0.5x (Yavaş)</option>
+            <option value="0.75">0.75x (Orta Yavaş)</option>
+            <option value="0.9" selected>0.9x (Normal)</option>
+            <option value="1.0">1.0x (Hızlı)</option>
+          </select>
+        </label>
+        <label class="field">
+          Kart Bekleme Süresi:
+          <select id="autoDelay">
+            <option value="2000">2 saniye</option>
+            <option value="3000" selected>3 saniye</option>
+            <option value="4000">4 saniye</option>
+            <option value="5000">5 saniye</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="row">
+        <span>Günde kaç kelime</span>
+        <div class="segs" role="group" aria-label="Günde kaç kelime">
+          <button class="seg" data-goal="10" aria-pressed="false">10</button>
+          <button class="seg" data-goal="25" aria-pressed="false">25</button>
+          <button class="seg" data-goal="50" aria-pressed="false">50</button>
+          <button class="seg" data-goal="100" aria-pressed="false">100</button>
+        </div>
+        <label class="field">Başka bir sayı <input id="goalInput" type="number" inputmode="numeric" min="1" max="500" step="1"> kelime</label>
+        <p class="note" id="goalNote"></p>
+      </div>
+
+      <div class="row">
+        <span>Kartın ön yüzü</span>
+        <div class="segs" role="group" aria-label="Kartın ön yüzü">
+          <button class="seg" data-key="front" data-value="en" aria-pressed="false">İngilizce</button>
+          <button class="seg" data-key="front" data-value="tr" aria-pressed="false">Türkçe</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <span>Kart sırası</span>
+        <div class="segs" role="group" aria-label="Kart sırası">
+          <button class="seg" data-key="shuffle" data-value="on" aria-pressed="false">Karışık</button>
+          <button class="seg" data-key="shuffle" data-value="off" aria-pressed="false">Listedeki sıra</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <span>Kar yağışı</span>
+        <div class="segs" role="group" aria-label="Kar yağışı">
+          <button class="seg" data-key="snow" data-value="on" aria-pressed="false">Açık</button>
+          <button class="seg" data-key="snow" data-value="off" aria-pressed="false">Kapalı</button>
+        </div>
+        <p class="note" id="snowNote" hidden>Cihazında hareketi azaltma ayarı açık olduğu için kar hareket etmeden görünür.</p>
+      </div>
+
+      <div class="row">
+        <span>Uygulama olarak kur</span>
+        <button class="seg" id="installBtn2" type="button">Telefona yükle</button>
+        <p class="note" id="installNote2"></p>
+      </div>
+
+      <div class="row">
+        <span>Yedekleme</span>
+        <div class="segs">
+          <button class="seg" id="backupBtn" type="button">Yedek kodu oluştur</button>
+          <button class="seg" id="restoreBtn" type="button">Kod ile geri yükle</button>
+        </div>
+        <textarea id="backupBox" hidden readonly rows="3" style="width:100%;padding:8px;border:2px solid var(--edge);border-radius:11px;background:transparent;color:var(--ink);font:12px monospace;resize:vertical"></textarea>
+        <button class="link" id="backupCopy" type="button" hidden>Kodu Kopyala</button>
+        <p class="note">İlerlemen ve eklediğin kelimeler bu telefonda kalıcı durur.</p>
+      </div>
+
+      <button class="reset" id="reset" type="button">Tüm ilerlemeyi sıfırla</button>
+    </section>
+  </main>
+  <div class="sr" id="live" aria-live="polite"></div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+const BASE_DATA = [[1,1,"Underline","Altını Çizmek"],[1,2,"To Correct","Düzeltmek"],[1,3,"Mistake","Yanlış / Hata"],[1,4,"To Circle","Daire İçine Almak"],[1,5,"To Complete","Tamamlamak"],[1,6,"Right","Doğru"],[1,7,"Wrong","Yanlış"],[1,8,"True","Doğru"],[1,9,"False","Yanlış"],[1,10,"The Same","Aynı"],[1,11,"Different","Farklı"],[1,12,"Put","Koymak"],[1,13,"Another","Diğer"],[1,14,"Thing","Şey, Eşya"],[1,15,"To See","Görmek"],[1,16,"About","Hakkında"],[1,17,"Map","Harita"],[1,18,"Bad","Kötü"],[1,19,"Cheap","Ucuz"],[1,20,"Expensive","Pahalı"],[1,21,"So","Bu Yüzden"],[1,22,"Shoes","Ayakkabılar"],[1,23,"To Sing","Şarkı Söylemek"],[1,24,"Wet","Islak"],[1,25,"Morning","Sabah"],[1,26,"Afternoon","Öğlen"],[1,27,"Evening","Akşam"],[1,28,"Night","Gece"],[1,29,"Summer","Yaz"],[1,30,"Winter","Kış"],[1,31,"Autumn / Fall","Sonbahar"],[1,32,"People","İnsan"],[1,33,"Board","Tahta"],[1,34,"Bag","Çanta"],[1,35,"A Piece Of Paper","Bir Parça Kağıt"],[1,36,"Dictionary","Sözlük"],[1,37,"Chair","Sandalye"],[1,38,"Table","Masa"],[1,39,"To Know","Bilmek"],[1,40,"To Remember","Hatırlamak"],[1,41,"To Spell","Hecelemek"],[1,42,"Awful","Berbat, Korkunç"],[1,43,"Terrible","Kötü"],[1,44,"Boring","Sıkıcı"],[1,45,"Interesting","İlginç"],[1,46,"Quickly","Hızlıca"],[1,47,"Fast","Hızlı"],[1,48,"Slow","Yavaş"],[1,49,"Slowly","Yavaşça"],[1,50,"School","Okul"],[1,51,"At School","Okulda"],[1,52,"To Look","Bakmak"],[1,53,"To Listen","Dinlemek"],[1,54,"To Explain","Açıklamak"],[1,55,"Married","Evli"],[1,56,"Single","Tek / Bekar"],[1,57,"At Midnight","Gece Yarısı"],[1,58,"Nearly","Neredeyse"],[1,59,"Almost","Hemen Hemen"],[1,60,"Days","Günler"],[1,61,"Monday","Pazartesi"],[1,62,"Tuesday","Salı"],[1,63,"Wednesday","Çarşamba"],[1,64,"Thursday","Perşembe"],[1,65,"Friday","Cuma"],[1,66,"Saturday","Cumartesi"],[1,67,"Sunday","Pazar"],[1,68,"Seasons","Mevsimler"],[1,69,"Spring","İlkbahar"],[1,70,"Mother / Mum","Anne"],[1,71,"Father / Dad","Baba"],[1,72,"Uncle","Amca"],[1,73,"Aunt","Teyze"],[1,74,"Brother","Erkek Kardeş"],[1,75,"Sister","Kız Kardeş"],[1,76,"Cousin","Kuzen"],[1,77,"Relatives","Akrabalar"],[1,78,"Son","Oğul"],[1,79,"Daughter","Kız Evlat"],[1,80,"Wife","Eş, Hanım"],[1,81,"Husband","Koca"],[1,82,"Child","Çocuk"],[1,83,"Children","Çocuklar"],[1,84,"When","Ne Zaman"],[1,85,"Where","Nerede"],[1,86,"Why","Neden / Niçin"],[1,87,"How","Nasıl"],[1,88,"How Often?","Ne Sıklıkta?"],[1,89,"Who","Kim"],[1,90,"What","Ne"],[1,91,"What Time?","Saat Kaç?"],[1,92,"How Far?","Ne Kadar Uzak?"],[1,93,"Grandmother","Büyükanne"],[1,94,"Grandfather","Büyükbaba"],[1,95,"To Get Off","İnmek"],[1,96,"To Push","İtmek, Zorlamak"],[1,97,"To Pull","Çekmek"],[1,98,"To Hold","Tutmak"],[1,99,"To Put","Koymak"],[1,100,"To Touch","Dokunmak"],[1,101,"To Carry","Taşımak"],[1,102,"Pick Up","Kaldırmak"],[1,103,"To Turn On","Açmak (TV, elektrik, radyo)"],[1,104,"To Turn Off","Kapatmak (TV, elektrik, radyo)"],[1,105,"To Give","Vermek"],[1,106,"To Drop","Düşürmek"],[1,107,"Parents","Ebeveynler"],[1,108,"Brother-in-Law","Kayınbirader"],[1,109,"Sister-in-Law","Elti"],[1,110,"Mother-in-Law","Kaynana"],[1,111,"Father-in-Law","Kayınpeder"],[1,112,"Nephew","Erkek Yeğen"],[1,113,"Niece","Kız Yeğen"],[1,114,"Grandson","Erkek Torun"],[1,115,"Granddaughter","Kız Torun"],[1,116,"Male","Erkek"],[1,117,"Female","Bayan"],[1,118,"Be Born","Doğmak"],[1,119,"Together","Birlikte"],[1,120,"Spend Time Together","Birlikte Zaman Geçirmek"],[1,121,"Life","Hayat"],[1,122,"Spend Time With Someone","Biriyle Zaman Geçirmek"],[1,123,"Each Other","Birbirini"],[1,124,"Spend Money","Para Harcamak"],[1,125,"To Win","Kazanmak"],[1,126,"Sit Down","Otur"],[1,127,"Stand Up","Ayağa Kalk"],[1,128,"To Ride","Sürmek"],[1,129,"To Jump","Atlamak"],[1,130,"To Climb","Tırmanmak"],[1,131,"To Break","Kırmak"],[1,132,"Broken","Kırık"],[1,133,"To Close / Shut","Kapatmak"],[1,134,"To Open","Açmak"],[1,135,"To Move","Taşınmak"],[1,136,"Head","Kafa"],[1,137,"Face","Yüz"],[1,138,"Hair","Saç"],[1,139,"Eye","Göz"],[1,140,"Ear","Kulak"],[1,141,"Nose","Burun"],[1,142,"Cheek","Yanak"],[1,143,"Chin","Çene"],[1,144,"Neck","Boyun"],[1,145,"Shoulder","Omuz"],[1,146,"Mouth","Ağız"],[1,147,"Lip","Dudak"],[1,148,"Tooth / Teeth","Diş / Dişler"],[1,149,"Chest","Göğüs"],[1,150,"Stomach","Mide"],[1,151,"Waist","Bel"],[1,152,"Hand","El"],[1,153,"Back","Sırt"],[1,154,"Arms","Kollar"],[1,155,"To Lie Down","Uzanmak"],[1,156,"To Run","Koşmak"],[1,157,"To Walk","Yürümek"],[1,158,"To Fall Over","Düşmek"],[1,159,"To Get On","Binmek"],[1,160,"Ankle","Ayak Bileği"],[1,161,"Toe","Ayak Parmağı"],[1,162,"Wrist","Bilek"],[1,163,"Weight","Ağırlık"],[1,164,"Tall","Uzun"],[1,165,"Average Height","Ortalama Boy"],[1,166,"Short","Kısa"],[1,167,"Slim","İnce"],[1,168,"Overweight","Aşırı Kilolu"],[1,169,"Good Looking","İyi Görünüşlü / Yakışıklı"],[1,170,"Attractive","Etkileyici"],[1,171,"Beautiful","Güzel"],[1,172,"Handsome","Yakışıklı"],[1,173,"Short Hair","Kısa Saçlı"],[1,174,"Medium-Length Hair","Orta Uzunlukta Saç"],[1,175,"Long","Uzun"],[1,176,"Blonde","Sarışın"],[1,177,"Light Brown Hair","Açık Kahverengi Saç"],[1,178,"Dark Brown Hair","Koyu Kahverengi Saç"],[1,179,"Thumb","Baş Parmak"],[1,180,"Fingers","Parmaklar"],[1,181,"Knee","Diz"],[1,182,"Leg","Bacak"],[1,183,"Foot / Feet","Ayak / Ayaklar"],[1,184,"To Laugh","Gülmek"],[1,185,"To Relax","Rahatlamak, Dinlenmek"],[1,186,"Relaxed","Rahatlamış"],[1,187,"Calm","Sakin"],[1,188,"Clever","Akıllı"],[1,189,"Intelligent","Zeki"],[1,190,"Stupid","Aptal"],[1,191,"Quiet","Sessiz / Sakin"],[1,192,"Serious","Ciddi"],[1,193,"On My Own","Kendi Başıma"],[1,194,"Shy","Utangaç"],[1,195,"Sociable","Sosyal"],[1,196,"Sporty","Sportif"],[1,197,"Tidy / Untidy","Düzenli / Dağınık"],[1,198,"Lazy","Tembel"],[1,199,"Hardworking","Çalışkan"],[2,200,"Organized","Düzenli"],[1,201,"Polite","Kibar"],[1,202,"Rude","Kaba"],[1,203,"Gray Hair","Gri Saç"],[1,204,"Black Hair","Siyah Saç"],[1,205,"Straight Hair","Düz Saç"],[1,206,"Curly Hair","Kıvırcık Saç"],[1,207,"Wavy Hair","Dalgalı Saç"],[1,208,"Brown Hair","Kahverengi Saç"],[1,209,"Green Eyes","Yeşil Göz"],[1,210,"Blue Eyes","Mavi Göz"],[1,211,"Beard","Sakal"],[1,212,"Moustache","Bıyık"],[1,213,"Ugly","Çirkin"],[1,214,"Young","Genç"],[1,215,"Teenager","Ergen"],[1,216,"An Adult","Yetişkin"],[1,217,"A Middle Aged","Orta Yaşlı"],[1,218,"An Elderly Man Or Woman","Yaşlı Erkek Veya Kadın"],[1,219,"Friendly / Unfriendly","Arkadaşça / Samimiyetsizce"],[1,220,"Kind","Nazik"],[1,221,"Nice / Pleasant","Hoş"],[1,222,"Horrible","Korkunç"],[1,223,"Fun","Eğlence"],[1,224,"Funny","Eğlenceli"],[1,225,"To Feel Boiling / Very Hot","Sıcaktan Bunalmak"],[1,226,"Partner","Partner, Eş"],[1,227,"Relationship","İlişki"],[1,228,"To Go Out With Someone","Biriyle Dışarı Çıkmak"],[1,229,"Get To Know Someone","Birini Tanımak"],[1,230,"Ex-Wife","Eski Eş"],[1,231,"Ex-Husband","Eski Koca"],[1,232,"To Get Married","Evlenmek"],[1,233,"To Have a Baby","Bebeği Olmak"],[1,234,"Couple","Çift"],[1,235,"To Split Up","Ayrılmak"],[1,236,"Divorced","Boşanmış"],[1,237,"Get On Well (with) Someone","Biriyle İyi Anlaşmak"],[1,238,"To Meet","Tanışmak"],[1,239,"Flatmate","Ev Arkadaşı"],[1,240,"Advice","Tavsiye"],[1,241,"Close Friend","Yakın Arkadaş"],[1,242,"Friendship","Arkadaşlık"],[1,243,"What's the Matter?","Sorun Ne?"],[1,244,"To Feel Tired","Yorgun Hissetmek"],[1,245,"To Feel Hungry","Acıkmak"],[1,246,"To Feel Thirsty","Susamak"],[1,248,"Dress","Elbise"],[1,249,"To Feel Freezing","Soğuktan Donmak"],[1,250,"To Feel Nervous","Gergin Hissetmek"],[1,251,"To Feel Ill","Hasta Hissetmek"],[1,252,"Happy","Mutlu"],[1,253,"Unhappy","Mutsuz"],[1,254,"Excited","Heyecanlı"],[1,255,"Worried","Endişeli"],[1,256,"Angry","Kızgın"],[1,257,"Frightened","Korkmuş"],[1,258,"Scared","Korkmuş"],[1,259,"Embarrassed","Utanmış"],[1,260,"Surprised","Şaşırmış"],[1,261,"To Be in Love","Aşık Olmak"],[1,262,"Upset","Üzgün"],[1,263,"Sad","Üzgün"],[1,264,"At the Weekend","Hafta Sonu"],[1,265,"During the Week","Hafta Boyunca"],[1,266,"Stay in","Evde / İçerde Kalmak"],[1,267,"Once a Week","Haftada 1 Kez"],[1,268,"Twice a Week","Haftada 2 Kez"],[1,269,"Come Round","Uğramak, Ziyaret Etmek"],[1,270,"To Go Out","Dışarı Çıkmak"],[1,271,"To Go Shopping","Alışveriş Yapmak"],[1,272,"To Go to the Gym","Spora Gitmek"],[1,273,"Late","Geç"],[1,274,"T-Shirt","Tişört"],[1,275,"Jacket","Ceket"],[1,276,"Suit","Takım"],[1,277,"Coat","Palto / Mont"],[1,278,"Rain Coat","Yağmurluk"],[1,279,"To Wear","Giymek"],[1,280,"Colours","Renkler"],[1,281,"White","Beyaz"],[1,282,"Cream","Krem"],[1,283,"Yellow","Sarı"],[1,284,"Green","Yeşil"],[1,285,"Blue","Mavi"],[1,286,"Purple","Mor"],[1,287,"Pink","Pembe"],[1,288,"Brown","Kahverengi"],[1,289,"Red","Kırmızı"],[1,290,"Orange","Turuncu"],[1,291,"Gray","Gri"],[1,292,"Black","Siyah"],[1,293,"Dark Blue","Koyu Mavi"],[1,294,"Light Blue","Açık Mavi"],[1,295,"Scarf","Atkı"],[1,296,"Tie","Kravat"],[1,297,"Hat","Şapka"],[1,298,"Belt","Kemer"],[1,299,"Early","Erken"],[1,300,"To Go For a Walk","Yürüyüşe Çıkmak"],[1,301,"Always","Her Zaman"],[1,302,"Often","Sık Sık"],[1,303,"Sometimes","Bazen"],[1,304,"Occasionally","Ara Ara"],[1,305,"Hardly Ever / Rarely","Neredeyse Hiç, Nadiren"],[1,306,"Never","Asla"],[1,307,"Late","Geç"],[1,308,"Shirt","Gömlek"],[1,309,"Top","Üst"],[1,310,"Jumper","Kazak"],[1,311,"Sweater","Süveter"],[1,312,"Trousers","Pantolon"],[1,313,"Skirt","Etek"],[1,314,"Loose","Geniş (Bol)"],[1,315,"To Try Something On","Bir Şeyi Denemek"],[1,316,"Changing Room","Deneme Odası"],[1,317,"To Pay","Ödemek"],[1,318,"Cash Desk","Kasa"],[1,319,"Price","Fiyat"],[1,320,"Free","Ücretsiz"],[1,321,"Bill","Fatura"],[1,322,"Cheap","Ucuz"],[1,323,"Handbag","El Çantası"],[1,324,"Umbrella","Şemsiye"],[1,325,"Watch","Saat"],[1,326,"A Pair Of Shoes","Bir Çift Ayakkabı"],[1,327,"Sandals","Sandalet"],[1,328,"Socks","Çoraplar"],[1,329,"Gloves","Eldivenler"],[1,330,"Trainers","Spor Ayakkabısı"],[1,331,"Tights","Tayt"],[1,332,"Glasses","Gözlük"],[1,333,"Sunglasses","Güneş Gözlüğü"],[1,334,"Casual","Günlük"],[1,335,"Small / Little","Küçük"],[1,336,"Comfortable","Rahat"],[1,337,"Uncomfortable","Rahatsız"],[1,338,"Damp","Nem"],[1,339,"Storm","Fırtına"],[1,340,"Illness","Hastalık"],[1,341,"Headache","Baş Ağrısı"],[1,342,"Toothache","Diş Ağrısı"],[1,343,"Stomach-Ache","Mide Ağrısı"],[1,344,"A Cold","Soğuk Algınlığı"],[1,345,"A Cough","Öksürük"],[1,346,"A Sore Throat","Boğaz Ağrısı"],[1,347,"To Save","Biriktirmek"],[1,348,"To Earn","Kazanmak (Para)"],[1,349,"To Win","Kazanmak (Oyun)"],[1,350,"Cost","Fiyat / Değer"],[1,351,"Bank Account","Banka Hesabı"],[1,352,"In Cash","Nakit"],[1,353,"Change","Değiştirmek"],[1,354,"Cheque","Çek"],[1,355,"To Sell","Satmak"],[1,356,"Price","Fiyat"],[1,357,"Spend Money On Something","Bir Şeye Para Harcamak"],[1,358,"Weather","Hava"],[1,359,"Sunny","Güneşli"],[1,360,"Cloudy","Bulutlu"],[1,361,"Wet","Islak"],[1,362,"Rainy","Yağmurlu"],[1,363,"Windy","Rüzgarlı"],[1,364,"Icy","Buzlu"],[1,365,"Foggy","Sisli"],[1,366,"Dry","Kuru"],[1,367,"Changeable Weather","Değişebilen Hava"],[1,368,"Pleasant","İyi"],[1,369,"Hot","Sıcak"],[1,370,"Flu","Grip"],[1,371,"A Temperature","Ateş"],[1,372,"A Pain in My Leg","Bacak Ağrısı"],[1,373,"My Leg Hurts","Bacağım Ağrıyor"],[1,374,"Backache","Bel Ağrısı"],[1,375,"I Feel Sick","Hasta Hissetmek"],[1,376,"Stay in Bed","Yatakta Yatmak"],[1,377,"Lie Down For a While","Bir Süre Uzanmak"],[1,378,"Chemist's","Eczane"],[1,379,"Drug Store","Eczane, İlaç Mağazası"],[1,380,"Pharmacy","Eczane"],[1,381,"Medicine","İlaç"],[1,382,"Plaster","Yara Bandı"],[1,383,"Tissue","Selpak"],[1,384,"I Need Something For a Cold","Soğuk Algınlığı İçin Bir Şeye İhtiyacım Var"],[1,385,"Meat","Et"],[1,386,"Cow","İnek"],[1,387,"Beef","Dana Eti"],[1,388,"Lamb","Kuzu Eti"],[1,389,"Sheep","Koyun"],[1,390,"Pig","Domuz"],[1,391,"Pork","Domuz Eti"],[1,392,"Duck","Ördek"],[1,393,"Cold","Soğuk"],[1,394,"Humid","Nemli"],[1,395,"Warm","Ilık"],[1,396,"Freeze","Donmak"],[1,397,"Cool","Serin"],[1,398,"Heavy Rain","Yoğun Yağmur"],[1,399,"Thunder","Gök Gürültüsü"],[1,400,"Lightning","Şimşek"],[1,401,"Freezing","Dondurucu"],[1,402,"Orange","Portakal"],[1,403,"Peach","Şeftali"],[1,404,"Apple","Elma"],[1,405,"Pear","Armut"],[1,406,"Lemon","Limon"],[1,407,"Mango","Mango"],[1,408,"Strawberry","Çilek"],[1,409,"Cherry","Vişne"],[1,410,"Melon","Kavun"],[1,411,"Grape","Üzüm"],[1,412,"Pineapple","Ananas"],[1,413,"Avocado","Avokado"],[1,414,"Taste","Lezzetli / Tat"],[1,415,"Sweet","Tatlı"],[1,416,"Prawn","Karides"],[1,417,"Crab","Yengeç"],[1,418,"Salmon","Somon"],[1,419,"Seafood","Deniz Ürünleri"],[1,420,"Sausage","Sucuk"],[1,421,"Bacon","Domuz Pastırması"],[1,422,"Chicken","Tavuk"],[1,423,"Vegetables","Sebzeler"],[1,424,"Banana","Muz"],[1,425,"Boiled Rice","Kaynamış Pirinç"],[1,426,"Fried Eggs","Pişmiş Yumurta"],[1,427,"Grilled Fish","Izgara Balık"],[1,428,"Roast Chicken","Pişmiş Tavuk"],[1,429,"Still Water","Durgun Su"],[1,430,"Sparkling Water","Soda"],[1,431,"Train","Tren"],[1,432,"Get / Take Train","Trene Binmek"],[1,433,"Journey","Seyahat"],[1,434,"Fare","Fiyat"],[1,435,"A Fast Train","Hızlı Tren"],[1,436,"Slow Train","Yavaş Tren"],[1,437,"Station","İstasyon"],[1,438,"Next Station","Gelecek İstasyon"],[1,439,"Bitter","Acı"],[1,440,"Fresh","Taze"],[1,441,"Raw","Çiğ"],[1,442,"Frozen","Donmuş"],[1,443,"Cooked","Pişmiş"],[1,444,"Milk","Süt"],[1,445,"Bread","Ekmek"],[1,446,"Butter","Tereyağı"],[1,447,"Cheese","Peynir"],[1,448,"Egg","Yumurta"],[1,449,"Sugar","Şeker"],[1,450,"Cake","Kek"],[1,451,"Jam","Reçel"],[1,452,"Biscuit","Bisküvi"],[1,453,"Olive","Zeytin"],[1,454,"Rice","Pirinç"],[1,455,"Pasta","Makarna"],[1,456,"A Jar of Jam","Bir Kavanoz Reçel"],[1,457,"A Bottle of Water / Wine","Bir Şişe Su / Şarap"],[1,458,"A Can of Soda / Cola","Bir Kutu Soda, Kola"],[1,459,"Salt","Tuz"],[1,460,"Pepper","Biber"],[1,461,"Vinegar","Sirke"],[1,462,"Napkin","Peçete"],[1,463,"Directions","Yönler"],[1,464,"Go Straight","Düz Git"],[1,465,"Keep Going","Devam Et"],[1,466,"Take The Second Turning","İkinci Dönüşten Dön"],[1,467,"On The Left","Solda"],[1,468,"On The Right","Sağda"],[1,469,"Go Along","Boyunca Git"],[1,470,"Turn Left","Sola Dön"],[1,471,"Turn Right","Sağa Dön"],[1,472,"On The Corner","Köşede"],[1,473,"On Your Right","Sağında"],[1,474,"On Your Left","Solunda"],[1,475,"Accident","Kaza"],[1,476,"Road","Yol"],[1,477,"Traffic","Trafik"],[1,478,"Roundabout","Kavşak"],[1,479,"Traffic Jam","Trafik Sıkışıklığı"],[1,480,"Car Park","Otopark"],[1,481,"Speed Camera","Hız Kamerası"],[1,482,"Main Road","Ana Yol"],[1,483,"Road Sign","Yol İşareti"],[1,484,"Petrol Station","Petrol İstasyonu"],[1,485,"Traffic Light","Trafik Işığı"],[1,486,"Pedestrian Crossing","Yaya Yolu"],[1,487,"Bowl","Kase"],[1,488,"Plate","Tabak"],[1,489,"Fork","Çatal"],[1,490,"Knife","Bıçak"],[1,491,"Spoon","Kaşık"],[1,492,"Signs and Notice","İşaret Ve Uyarılar"],[1,493,"Sign","İşaret"],[1,494,"Entrance / Way in","Giriş"],[1,495,"Exit / Way Out","Çıkış"],[1,496,"No Entry","Giriş Yok"],[1,497,"No Exit","Çıkış Yok"],[1,498,"No Smoking","Sigara İçilmez"],[1,499,"Please Don't Disturb","Rahatsız Etmeyin"],[1,500,"Queue Here","Sıra Burada"],[1,501,"Sale","İndirim"],[1,502,"Out of Order","Kullanım Dışı"],[1,503,"City","Şehir"],[1,504,"Country","Ülke"],[1,505,"Capital","Başkent"],[1,506,"Enormous","Kocaman"],[1,507,"Famous","Ünlü"],[1,510,"Pavement","Kaldırım"],[1,511,"How Far is it?","Ne Kadar Uzaklıkta?"],[1,512,"Rush Hour","İş Çıkış Saati"],[1,513,"Speed Limit","Hız Limiti"],[1,514,"Accident","Kaza"],[1,515,"Population","Nüfus"],[1,516,"Modern","Modern"],[1,517,"Industrial","Endüstriyel"],[1,518,"Historic","Tarihi"],[1,519,"In the North East","Kuzeydoğuda"],[1,520,"On the Coast","Kıyıda"],[1,521,"Famous for Historic Buildings","Tarihi Yapılarıyla Ünlü"],[1,522,"Opinion","Düşünce / Fikir"],[1,523,"Busy","Meşgul"],[1,524,"Crowded","Kalabalık"],[1,525,"Polluted","Kirli (Havanın Kirlenmesi, Çevrenin Kirlenmesi)"],[1,526,"Dirty","Kirli"],[1,527,"There Are Lots to Do","Yapacak Çok Şey Var"],[1,528,"There is Nothing to Do","Yapacak Bir Şey Yok"],[1,529,"Nightlife","Gece Hayatı"],[1,530,"Safe","Güvenli"],[1,531,"Popular","Popüler"],[1,532,"North","Kuzey"],[1,533,"South","Güney"],[1,534,"West","Batı"],[1,535,"East","Doğu"],[1,536,"Border","Sınır"],[1,537,"Beach","Plaj"],[1,538,"Coast","Kıyı"],[1,539,"Mountain","Dağ"],[1,540,"River","Çay / Nehir"],[1,541,"Suburb","Şehir Dışı"],[1,542,"City (a very large town)","Şehir"],[1,543,"Town (smaller than city)","Kasaba"],[1,544,"Castle","Kale"],[1,545,"Palace","Saray"],[1,546,"Feel Safe","Güvende Hissetmek"],[1,547,"Dangerous","Tehlikeli"],[1,548,"Bridge","Köprü"],[1,549,"Village","Köy"],[1,550,"Size","Ölçü"],[1,551,"Location","Yer"],[1,552,"Population","Nüfus"],[1,553,"Modern","Modern"],[1,554,"Industrial","Endüstriyel"],[1,555,"Historic","Tarihi"],[1,556,"In the North East","Kuzeydoğuda"],[1,557,"Statue","Heykel"],[1,558,"Square","Meydan"],[1,559,"Church","Kilise"],[1,560,"Temple","Tapınak"],[2,1,"Sky","Gökyüzü"],[2,2,"Wood","Ağaçlık"],[2,3,"Hill","Tepe"],[2,4,"Farmer","Çiftçi"],[2,5,"Valley","Vadi"],[2,6,"Tree","Ağaç"],[2,7,"Field","Alan / Tarla"],[2,8,"Farm","Çiftlik"],[2,9,"Lake","Göl"],[2,10,"Horse","At"],[2,11,"Boat","Kayık"],[2,12,"Grass","Çimen"],[2,13,"Dog","Köpek"],[2,14,"Path","Patika / Keçi Yolu"],[2,15,"Grow","Büyü(t)mek / Yetiş(tir)mek"],[2,16,"Own","Sahip Olmak"],[2,17,"Crop","Mahsul"],[2,18,"Area","Alan / Bölge"],[2,19,"Countryside","Kırsal Bölge"],[2,20,"Bird","Kuş"],[2,21,"Wonderful","Harika"],[2,22,"Fresh Food","Taze Yiyecek"],[2,23,"Healthy","Sağlıklı"],[2,24,"Public Transport","Toplu Taşıma"],[2,25,"Terrible","Korkunç"],[2,26,"Ride a Bike","Bisiklete Binmek"],[2,27,"Alone","Yalnız"],[2,28,"Lonely","Yalnız Bir Şekilde"],[2,29,"Look After","İlgilenmek"],[2,30,"Market","Market"],[2,31,"Outdoor","Açık Hava / Dış Mekan"],[2,32,"Indoor","Kapalı / İç Mekan"],[2,33,"Shopping Centre","Alışveriş Merkezi"],[2,34,"Department Store","Büyük Mağaza"],[2,35,"Hypermarket","Hipermarket"],[2,36,"Butcher's","Kasap"],[2,37,"Chemist's","Eczane"],[2,38,"Paper Shop / Newsagent","Gazete Bayii"],[2,39,"Convenient","Uygun"],[2,40,"Get","Edinmek / Almak"],[2,41,"Do The Shopping","Alışveriş Yapmak"],[2,42,"Queue","Sıra / Kuyruk"],[2,43,"Check Out","Kasa"],[2,44,"Choose","Seçmek"],[2,45,"Prefer","Tercih Etmek"],[2,46,"Fill","Doldurmak"],[2,47,"Full","Dolu"],[2,48,"Trolley","Alışveriş Arabası"],[2,49,"Deliver","İletmek / Ulaştırmak"],[2,50,"(on) The Top Floor","Üst Katta"],[2,51,"(on) The Second Floor","İkinci Katta"],[2,52,"(on) The First Floor","Birinci Katta"],[2,53,"(on) The Ground Floor","Zemin Katta"],[2,54,"Garden","Bahçe"],[2,55,"Steps","Merdivenler / Basamaklar"],[2,56,"(in) The Basement","Bodrumda"],[2,57,"Rubbish","Çöp"],[2,58,"Front Door","Sokak Kapısı / Ön Kapı"],[2,59,"Stairs","Merdivenler"],[2,60,"Lift","Asansör"],[2,61,"Flat","Daire"],[2,62,"Balcony","Balkon"],[2,63,"Modern","Modern"],[2,64,"Old","Eski"],[2,65,"View","Görüntü / Manzara"],[2,66,"Upstairs","Üst Kat"],[2,67,"Downstairs","Alt Kat"],[2,68,"Outside","Dışarısı"],[2,69,"Inside","İçerisi"],[2,70,"Garage","Garaj"],[2,71,"Parking","Park Yeri"],[2,72,"Living Room","Oturma Odası"],[2,73,"Dining Room","Yemek Odası"],[2,74,"Study Room","Çalışma Odası"],[2,75,"Kitchen","Mutfak"],[2,76,"Home","Ev"],[2,77,"House","Bina"],[2,78,"Shelf","Raf"],[2,79,"Tap (turn the Tap on-off)","Musluk"],[2,80,"Cup","Fincan"],[2,81,"Microwave","Mikrodalga"],[2,82,"Frying Pan","Kızartma Tavası"],[2,83,"Freezer","Dondurucu"],[2,84,"Sink","Lavabo"],[2,85,"Saucer","Çay Tabağı / Fincan Tabağı"],[2,86,"Hob","Set Üstü Ocak"],[2,87,"Saucepan","Sos Tavası"],[2,88,"(rubbish) Bin","Çöp Kovası"],[2,89,"Full","Dolu"],[2,90,"Empty","Boş"],[2,91,"Oven","Fırın"],[2,92,"Fridge","Buzdolabı"],[2,93,"Washing Machine","Çamaşır Makinası"],[2,94,"Cupboard","Dolap"],[2,95,"Dishwasher","Bulaşık Makinası"],[2,96,"Cooker","Ocak"],[2,97,"Do The Shopping","Alışveriş Yapmak"],[2,98,"Clean","Temizlemek"],[2,99,"Take","Almak"],[2,100,"Make","Yapmak"],[2,101,"Do the Ironing","Ütü Yapmak"],[2,102,"Do the Washing Up","Bulaşıkları Yıkamak"],[2,103,"Housework","Ev İşi"],[2,104,"Homework","Ev Ödevi"],[2,105,"Bedroom","Yatak Odası"],[2,106,"Singlebed","Tekli Yatak"],[2,107,"Bedside Table","Komodin"],[2,108,"Desk","Sıra / Masa"],[2,109,"Chest of Drawers","Çekmeceler"],[2,110,"Wardrobe","Gardırop"],[2,111,"Bath","Banyo"],[2,112,"Shower","Duş"],[2,113,"Wash Basin","Lavabo"],[2,114,"Mirror","Ayna"],[2,115,"Blanket","Battaniye"],[2,116,"Sheets","Çarşaflar"],[2,117,"Towels","Havlular"],[2,118,"Soap","Sabun"],[2,119,"Have a Wash","Yıkanmak"],[2,120,"Clean Your Teeth","Dişlerini Temizlemek"],[2,121,"Wash Your Hair","Saçlarını Yıkamak"],[2,122,"Have a Shave","Tıraş Olmak"],[2,123,"Put On Make Up","Makyaj Yapmak"],[2,124,"Take Off Make Up","Makyajı Çıkarmak / Silmek"],[2,125,"Tissue","Mendil"],[2,126,"Put On Perfume","Parfüm Sıkmak"],[2,127,"Wear Perfume","Parfüm Sıkmak"],[2,128,"A Razor","Jilet"],[2,129,"Toothpaste","Diş Macunu"],[2,130,"Toothbrush","Diş Fırçası"],[2,131,"Window","Pencere"],[2,132,"Light","Işık"],[2,133,"Ceiling","Tavan"],[2,134,"Wall","Duvar"],[2,135,"Curtains","Perdeler"],[2,136,"Cushion","Minder / Yastık"],[2,137,"Lamp","Lamba"],[2,138,"Armchair","Tekli Koltuk"],[2,139,"Coffee Table","Orta Sehpa"],[2,140,"Floor","Yer / Kat"],[2,141,"Sofa","Çekyat"],[2,142,"Rug","Kilim"],[2,143,"Carpet","Halı"],[2,144,"Chemistry","Kimya"],[2,145,"Physics","Fizik"],[2,146,"Biology","Biyoloji"],[2,147,"Maths","Matematik"],[2,148,"Geography","Coğrafya"],[2,149,"History","Tarih"],[2,150,"Literature","Edebiyat"],[2,151,"Art","Resim / Sanat"],[2,152,"Subjects","Konular / Dersler"],[2,153,"Good at Something","Bir Şeyde İyi Olmak"],[2,154,"Bad at Something","Bir Şeyde Kötü Olmak"],[2,155,"Terrible At","Bir Şeyde Çok Kötü Olmak"],[2,156,"Kindergarten","Anaokulu / Kreş"],[2,157,"Primary School","İlkokul"],[2,158,"Secondary School","Ortaokul"],[2,159,"State School","Devlet Okulu"],[2,160,"Private School","Özel Okul"],[2,161,"Start at School","Okula Başlamak"],[2,162,"Leave School","Okuldan Ayrılmak"],[2,163,"Get a Job","İşe Girmek / İş Bulmak"],[2,164,"Take Exam","Sınav Olmak"],[2,165,"Pass an Exam","Bir Sınavı Geçmek"],[2,166,"Fail an Exam","Bir Sınavdan Kalmak"],[2,167,"Result","Sonuç"],[2,168,"Grade","Not / Sınav Sonucu"],[2,169,"Get a Grade","Sınav Sonucu Almak"],[2,170,"Do Well","İyi Yapmak"],[2,171,"Do Badly","Kötü Bir Şekilde Yapmak"],[2,172,"Do a Degree","Derece Yapmak"],[2,173,"Term","Dönem"],[2,174,"Library","Kütüphane"],[2,175,"Undergraduate","Lisans Öğrencisi"],[2,176,"Write an Essay","Bir Deneme Yazısı Yazmak"],[2,177,"Again","Yeniden"],[2,178,"Psychology","Psikoloji"],[2,179,"A Psychologist","Psikolog"],[2,180,"Economics","Ekonomi"],[2,181,"Economist","Ekonomist"],[2,182,"Law","Hukuk"],[2,183,"Lawyer","Avukat"],[2,184,"Politics","Siyaset"],[2,185,"A Politician","Siyasetçi"],[2,186,"Engineering","Mühendislik"],[2,187,"An Engineer","Mühendis"],[2,188,"Architecture","Mimarlık"],[2,189,"An Architect","Mimar"],[2,190,"A Builder","İnşaatçı"],[2,191,"A Teacher","Öğretmen"],[2,192,"A Shop Assistant","Satıcı"],[2,193,"A Nurse","Hemşire"],[2,194,"A Secretary","Sekreter"],[2,195,"A Hairdresser","Kuaför"],[2,196,"A Chef","Şef"],[2,197,"A Dentist","Dişçi"],[2,198,"A Soldier","Asker"],[2,199,"A Cleaner","Temizlikçi"],[2,200,"A Vet","Veteriner"],[2,201,"A Pilot","Pilot"],[2,202,"A Lorry Driver","Kamyonet Sürücüsü"],[2,203,"Self-Employed","Kendi İşinin Sahibi"],[2,204,"Unemployed","İşsiz"],[2,205,"Retired","Emekli"],[2,206,"Housewife","Ev Hanımı"],[2,207,"Boss","Patron"],[2,208,"An Office","Ofis"],[2,209,"A Factory","Fabrika"],[2,210,"Company","Şirket"],[2,211,"Full-Time","Tam Zamanlı"],[2,212,"Part-Time","Yarı Zamanlı"],[2,213,"Long Hours","Uzun Saatler"],[2,214,"Earn","Kazanmak (Para)"],[2,215,"Salary","Maaş"],[2,216,"Wages","Günlük Ücret"],[2,217,"Low","Düşük"],[2,218,"High","Yüksek"],[2,219,"Design Building","Bina Tasarlamak"],[2,220,"Discuss Something","Bir Şeyi Tartışmak"],[2,221,"To Go To Meeting","Bir Toplantıya Gitmek"],[2,222,"Write a Report","Bir Rapor Yazmak"],[2,223,"Organize Meeting","Toplantı Organize Etmek"],[2,224,"Colleague","İş Arkadaşı / Meslektaş"],[2,225,"Webcam","Video Kamera / İnternet Kamerası"],[2,226,"Printer","Yazıcı"],[2,227,"Laptop","Dizüstü Bilgisayar"],[2,228,"Hard Drive","Sabit Disk"],[2,229,"Monitor","Monitör"],[2,230,"Disc","Disk"],[2,231,"Mouse","Fare"],[2,232,"Memory Stick","Hafıza Kartı / Taşınabilir Bellek"],[2,233,"Screen","Ekran"],[2,234,"Cut","Kesmek"],[2,235,"Paste","Yapıştırmak"],[2,236,"Save","Kaydetmek"],[2,237,"Print","Yazdırmak"],[2,238,"Copy","Kopyasını Almak / Kopyalamak"],[2,239,"Check Your Email","E-Posta Kontrol Etmek"],[2,240,"Get an Email","Bir e-Posta Almak"],[2,241,"Reply To An Email","Bir e-Postaya Cevap Vermek"],[2,242,"On The Internet","Internette"],[2,243,"Search","Araştırmak"],[2,244,"Wonderful / Fantastic","Harika / Büyüleyici"],[2,245,"Favourite","Favori"],[2,246,"Enjoy Doing Something","Bir Şeyi Yapmaktan Keyif Almak"],[2,247,"Boring","Sıkıcı"],[2,248,"Be Keen On Something","Bir Şeye Çok İstekli Olmak"],[2,249,"To Be Interested in","Bir Şeye İlgili Olmak"],[2,250,"Prefer","Tercih Etmek"],[2,251,"Camping","Kamp Yapma / Kamp"],[2,252,"Travelling","Seyahat Etme / Seyahat"],[2,253,"Collect Things","Bir Şeyler Toplamak"],[2,254,"Skiing","Kayak Yapma / Kayak"],[2,255,"Fishing","Balık Tutma"],[2,256,"Spend Time","Zaman Geçirmek / Harcamak"],[2,257,"Gym","Spor / Spor Salonu"],[2,258,"Drawing","Çizim Yapma / Çizim"],[2,259,"Painting","Resim Yapma / Resim / Tablo"],[2,260,"Gardening","Bahçecilik"],[2,261,"Repair Cars","Arabaları Tamir Etmek"],[2,262,"Listen to Something","Bir Şeyi Dinlemek"],[2,263,"Shooting","Atış Yapma / Atış"],[2,264,"Singing","Şarkı Söyleme"],[2,265,"Band","Müzik Grubu"],[2,266,"Well-Known","İyi Bilinen"],[2,267,"Lead Singer","Solist (Müzik Grubunun)"],[2,268,"Concert","Konser"],[2,269,"Conductor","Orkestra Şefi"],[2,270,"Violinist","Kemancı"],[2,271,"Violin","Keman"],[2,272,"Composer","Bestekar"],[2,273,"Perform","İcra Etmek"],[2,74,"Thriller","Gerilim"],[2,275,"Exciting","Heyecan Verici"],[2,276,"Comedy","Komedi"],[2,277,"Funny","Eğlenceli"],[2,278,"Violent","Şiddetli / Şiddet İçerikli"],[2,279,"Love Story","Aşk Hikayesi"],[2,280,"Cinema","Sinema"],[2,281,"Movie","Film"],[2,282,"Review","İnceleme"],[2,283,"Star","Yıldız"],[2,284,"Actor","Aktör"],[2,285,"See a Film At the Cinema","Sinemada Bir Film İzlemek"],[2,286,"Media","Medya"],[2,287,"Magazine","Dergi"],[2,288,"Report","Rapor"],[2,289,"Event","Olay"],[2,290,"Die","Ölmek"],[2,291,"War","Savaş"],[2,292,"Peace","Barış / Huzur"],[2,293,"Disaster","Felaket"],[2,294,"Celebrity","Ünlü (Kişi)"],[2,295,"Advert / Advertisement","İlan / Reklam"],[2,296,"Newspaper / Paper","Gazete"],[2,297,"Find Out","Bulmak"],[2,298,"Happen","Olmak / Meydana Gelmek"],[2,299,"Article","Makale"],[2,300,"On Tv","Televizyonda"],[2,301,"On the Radio","Radyoda"],[2,302,"Nothing Much / Nothing Important","Önemli Bir Şey Değil"],[2,303,"Weather Forecast","Havadurumu / Tahmini"],[2,304,"Believe","İnanmak"],[2,305,"To Go Abroad","Yurtdışına Gitmek"],[2,306,"To Book a Flight","Bir Uçuş Rezervasyonu Yapmak"],[2,307,"Find Your Passport","Pasaportunu Bulmak"],[2,308,"To Get a Visa","Vize Almak"],[2,309,"To Get Travel Insurance","Seyahat Sigortası Almak"],[2,310,"To Get Foreign Currency","Yabancı Ülke Parası Almak"],[2,311,"To Pack Your Suitcase","Valizini Toplamak"],[2,312,"To Hire a Car","Araba Kiralamak"],[2,313,"To Arrange Something","Bir Şey Ayarlamak"],[2,314,"On Holiday","Tatilde"],[2,315,"Currency","Döviz"],[2,316,"To Stay in a Hotel","Bir Otelde Kalmak"],[2,317,"Facilities","Özellikler"],[2,318,"Air Conditioning","Klima"],[2,319,"Central Heating","Merkezi Isıtma"],[2,320,"Staff","Personel / Kadro"],[2,321,"Helpful","Yardımcı / Yardımsever"],[2,322,"Tourist","Turist"],[2,323,"Delicious","Lezzetli"],[2,324,"Recommend","Önermek"],[2,325,"To Book A Room","Bir Oda Rezervasyonu Yapmak"],[2,326,"Included","İçeren"],[2,327,"Never Mind","Dert Etme / Boşver"],[2,328,"Details","Detaylar"],[2,329,"Double Room","Çift Kişilik Oda"],[2,330,"Single Room","Tek Kişilik Oda"],[2,331,"Twin Room","Çift Yataklı Oda"],[2,332,"That's a Shame","Bu Bir Utanç"],[2,333,"What a Shame","Ne Utanç Verici"],[2,334,"Passengers","Yolcular"],[2,335,"Airport","Havaalanı"],[2,336,"Luggage / Suitcase / Bag","Bagaj / Valiz / Çanta"],[2,337,"Ticket","Bilet"],[2,338,"Hand Luggage","El Bagajı"],[2,339,"Window Seat","Pencere Koltuğu"],[2,340,"Aisle","Koridor"],[2,341,"Have a Good Flight","İyi Uçuşlar"],[2,342,"Departed","Ayrılmış"],[2,343,"Departure","Havalanma / Kalkış"],[2,344,"Gate","Kapı"],[2,345,"Delay","Gecikme"],[2,346,"Fasten Seat Belt","Emniyet Kemeri Takmak"],[2,347,"Plane Takes Off","Uçak Kalkar"],[2,348,"Plane Lands","Uçak İner"],[2,349,"Baggage Reclaim","Bagaj Teslim"],[2,350,"To Go Through Customs","Gümrükten Geçmek"],[2,351,"Resort","Tatil Yeri"],[2,352,"Fly","Uçuş Yapmak"],[2,353,"Rent an Apartment","Apartman Dairesi Kiralamak"],[2,354,"Sunbathe","Güneşlenmek"],[2,355,"Relax","Rahatlamak"],[2,356,"An Hour or So","Bir Saate Kadar"],[2,357,"To Go For a Walk","Yürüyüşe Çıkmak"],[2,358,"Perfect","Mükemmel"],[2,359,"Map","Harita"],[2,360,"Guide","Rehber"],[2,361,"Guide Book","Rehber Kitap"],[2,362,"To Go Sightseeing","Geziye Çıkmak / Bölge Turuna Çıkmak"],[2,363,"Art Gallery","Sanat Galerisi"],[2,364,"To Visit Museum","Müze Ziyaret Etmek"],[2,365,"To Look Around","Bakınmak / Etrafı Seyretmek"],[2,366,"To Get Lost","Kaybolmak"],[2,367,"To Take Photos","Fotoğraf Çekmek"],[2,368,"Cash Machine","Para Çekme Makinesi"],[2,369,"Change Dollars into Euro","Doları Avroya Çevirmek"],[2,370,"Exchange Rate","Döviz Kuru"],[2,371,"Commission","Komisyon"],[2,372,"To Charge Someone","Birini Suçlamak"],[2,373,"Envelope","Zarf"],[2,374,"Put a Stamp","Posta Pulu Koymak"],[2,375,"Postman","Postacı (Erkek)"],[2,376,"Postwoman","Postacı (Kadın)"],[2,377,"A Parcel","Posta / Parsel / Koli"],[2,378,"Have a Nice Day","İyi Günler"],[2,379,"Have a Good Day","İyi Günler"],[2,380,"Well Done","Aferin"],[2,381,"Congratulations","Tebrikler"],[2,382,"Good Luck","İyi Şanslar"],[2,383,"Cheers","Şerefe"],[2,384,"To Go Out For","Dışarı Çıkmak"],[2,385,"Come Around For (a Drink)","İçmek İçin Dışarıda Buluşmak"],[2,386,"Invite","Davet Etmek"],[2,387,"Party","Parti"],[2,388,"Great","Harika"],[2,389,"I'd Love To","Çok İsterim"],[2,390,"That Sounds Lovely","Kulağa Hoş Geliyor"],[2,391,"I'm Afraid I Can't","Korkarım Yapamam"],[2,392,"Suggest","Önermek"],[2,393,"Offer","Teklif Etmek / Ismarlamak"],[2,394,"Accept","Kabul Etmek"],[2,395,"Refuse","Geri Çevirmek"],[2,396,"Let Me Pay","Bırak Ben Ödeyeyim"],[2,397,"Let Me Give You a Lift","Ben Seni Bırakayım"],[2,398,"Apologize For Something","Bir Şey İçin Özür Dilemek"],[2,399,"Rude","Kaba"],[2,400,"Lose","Kaybetmek"],[2,401,"Excellent","Harika"],[2,402,"Think","Düşünmek"],[2,403,"Thought","Düşünce"],[2,404,"Agree With Someone","Biriyle Aynı Fikirde Olmak"],[2,405,"Personally","Kişisel Olarak"],[2,406,"A Waste of Money / Time","Para / Zaman Kaybı / İsrafı"],[2,407,"Take a Message","Mesaj / Not Almak"],[2,408,"Leave a Message","Mesaj Bırakmak"],[2,409,"Line is Busy / Engaged","Hat Meşgul"],[2,410,"Wrong Number","Yanlış Numara"]];
+
+const LS_KEY = 'kelime-kartlari-v3';
+const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+let state = {status:{}, deck:'all', front:'en', shuffle:true, goal:25, snow:true, customWords:[], ver:3, autoSpeed:0.9, autoDelay:3000};
+let storageOk = true;
+
+try{
+  const raw = localStorage.getItem(LS_KEY);
+  if(raw){
+    const s = JSON.parse(raw);
+    if(s && typeof s === 'object'){
+      if(s.status && typeof s.status === 'object') state.status = s.status;
+      if(['1','2','all'].indexOf(s.deck) > -1) state.deck = s.deck;
+      if(['en','tr'].indexOf(s.front) > -1) state.front = s.front;
+      if(typeof s.shuffle === 'boolean') state.shuffle = s.shuffle;
+      if(typeof s.goal === 'number' && s.goal>=1 && s.goal<=500) state.goal = Math.round(s.goal);
+      if(typeof s.snow === 'boolean') state.snow = s.snow;
+      if(Array.isArray(s.customWords)) state.customWords = s.customWords;
+      if(typeof s.autoSpeed === 'number') state.autoSpeed = s.autoSpeed;
+      if(typeof s.autoDelay === 'number') state.autoDelay = s.autoDelay;
+    }
+  }
+}catch(e){}
+try{ localStorage.setItem(LS_KEY+'-test','1'); localStorage.removeItem(LS_KEY+'-test'); }catch(e){ storageOk = false; }
+
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
+
+let cards = [];
+let byId = new Map();
+
+function rebuildCards(){
+  const allData = BASE_DATA.concat(state.customWords || []);
+  cards = allData.map(function(r){ return {id:r[0]+'-'+r[1], lv:r[0], n:r[1], en:r[2], tr:r[3], ex:r[4]||''}; });
+  byId = new Map(cards.map(function(c){ return [c.id,c]; }));
+}
+rebuildCards();
+
+const $ = function(id){ return document.getElementById(id); };
+const stage=$('stage'), card=$('card'), inner=$('inner');
+
+let screen = 'path';
+let mode = 'day';
+let dayIndex = 0;
+let queue = [];
+let sessionTotal = 0;
+let history = [];
+let flipped = false;
+let busy = false;
+let doneAction = null;
+let nextDayAction = null;
+let currentPage = 1;
+const DAYS_PER_PAGE = 10;
+
+let isAutoPlaying = false;
+let autoTimer = null;
+
+function isKnown(id){ return state.status[id]==='k'; }
+function isSeen(id){ return state.status[id]==='k' || state.status[id]==='u'; }
+function shuffleArr(a){
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    const t=a[i]; a[i]=a[j]; a[j]=t;
+  }
+  return a;
+}
+function deckCards(){
+  return state.deck==='all' ? cards : cards.filter(function(c){ return String(c.lv)===state.deck; });
+}
+function totalDays(){ return Math.max(1, Math.ceil(deckCards().length / state.goal)); }
+function chunkIds(i){
+  const pool = deckCards();
+  return pool.slice(i*state.goal, i*state.goal + state.goal).map(function(c){ return c.id; });
+}
+function dayInfo(i){
+  const ids = chunkIds(i);
+  const known = ids.filter(isKnown).length;
+  const unknown = ids.filter(function(id){ return state.status[id]==='u'; }).length;
+  const seen = known + unknown;
+  let status = 'new';
+  if(ids.length>0 && known===ids.length) status = 'done';
+  else if(seen>0) status = 'partial';
+  return {ids:ids, known:known, unknown:unknown, seen:seen, total:ids.length, status:status};
+}
+function nextSuggestedDay(){
+  const n = totalDays();
+  for(let i=0;i<n;i++){ if(dayInfo(i).status!=='done') return i; }
+  return n-1;
+}
+
+function sizeOf(t){ const l=t.length; return l<=10?'xl' : l<=18?'lg' : l<=30?'md' : 'sm'; }
+
+function renderPath(){
+  document.querySelectorAll('[data-key="deck"]').forEach(function(b){
+    b.setAttribute('aria-pressed', String(state.deck===b.dataset.value));
+  });
+  const pool = deckCards();
+  const known = pool.filter(function(c){ return isKnown(c.id); }).length;
+  const unknown = pool.filter(function(c){ return state.status[c.id]==='u'; }).length;
+  $('tCount').textContent = pool.length;
+  $('kCount').textContent = known;
+  $('knownBig').textContent = known;
+  $('unknownBig').textContent = unknown;
+  if(!storageOk) $('noStore').hidden = false;
+
+  const n = totalDays();
+  const totalPages = Math.max(1, Math.ceil(n / DAYS_PER_PAGE));
+  if(currentPage > totalPages) currentPage = totalPages;
+
+  const suggested = nextSuggestedDay();
+  $('pathSummary').textContent = 'Günde ' + state.goal + ' kelime, toplam ' + n + ' gün';
+
+  const grid = $('pathGrid');
+  grid.innerHTML = '';
+  
+  const startDay = (currentPage - 1) * DAYS_PER_PAGE;
+  const endDay = Math.min(n, startDay + DAYS_PER_PAGE);
+
+  for(let i = startDay; i < endDay; i++){
+    const info = dayInfo(i);
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'day' + (info.status==='done' ? ' done' : info.status==='partial' ? ' partial' : '') + (i===suggested && info.status!=='done' ? ' next' : '');
+    b.innerHTML = '<b>' + (i+1) + '</b><small>' + (info.status==='done' ? 'bitti' : info.total===0 ? '' : info.seen + '/' + info.total) + '</small>';
+    if(info.unknown>0){
+      const dot = document.createElement('span');
+      dot.className = 'dot';
+      b.appendChild(dot);
+    }
+    b.addEventListener('click', function(){ openDay(i); });
+    grid.appendChild(b);
+  }
+
+  $('pageInfoText').textContent = 'Sayfa ' + currentPage + ' / ' + totalPages;
+  $('prevPageBtn').disabled = (currentPage <= 1);
+  $('nextPageBtn').disabled = (currentPage >= totalPages);
+}
+
+$('prevPageBtn').addEventListener('click', function(){
+  if(currentPage > 1){ currentPage--; renderPath(); }
+});
+$('nextPageBtn').addEventListener('click', function(){
+  const totalPages = Math.ceil(totalDays() / DAYS_PER_PAGE);
+  if(currentPage < totalPages){ currentPage++; renderPath(); }
+});
+
+function openDay(i){
+  dayIndex = i;
+  mode = 'day';
+  screen = 'study';
+  buildQueue();
+  renderAll();
+}
+function openMode(m){
+  mode = m;
+  screen = 'study';
+  buildQueue();
+  renderAll();
+}
+function backToPath(){
+  stopAutoPlay();
+  screen = 'path';
+  renderAll();
+}
+
+function buildQueue(){
+  let ids;
+  if(mode==='day'){
+    const allChunkIds = chunkIds(dayIndex);
+    const unseenIds = allChunkIds.filter(function(id){ return !isSeen(id); });
+    ids = unseenIds.length > 0 ? unseenIds : allChunkIds.slice();
+  }else{
+    let pool = deckCards();
+    if(mode==='remaining') pool = pool.filter(function(c){ return !isKnown(c.id); });
+    else if(mode==='unknown') pool = pool.filter(function(c){ return state.status[c.id]==='u'; });
+    else if(mode==='known') pool = pool.filter(function(c){ return isKnown(c.id); });
+    ids = pool.map(function(c){ return c.id; });
+  }
+  if(state.shuffle) shuffleArr(ids);
+  queue = ids;
+  sessionTotal = ids.length;
+  history = [];
+}
+
+function setChip(el, status){
+  if(status==='k'){ el.hidden=false; el.className='chip chip-k'; el.textContent='Bildiğin kart'; }
+  else if(status==='u'){ el.hidden=false; el.className='chip chip-u'; el.textContent='Bilmediklerim listesinde'; }
+  else { el.hidden=true; }
+}
+function resetFlip(){
+  inner.style.transition = 'none';
+  card.classList.remove('flipped');
+  flipped = false;
+  $('backFace').setAttribute('aria-hidden','true');
+  void inner.offsetWidth;
+  inner.style.transition = '';
+}
+function flip(){
+  if(!queue.length || busy) return;
+  flipped = !flipped;
+  card.classList.toggle('flipped', flipped);
+  $('backFace').setAttribute('aria-hidden', String(!flipped));
+  if(flipped){
+    const c = byId.get(queue[0]);
+    $('live').textContent = 'Cevap: ' + (state.front==='en' ? c.tr : c.en);
+  }
+}
+function titleFor(){
+  if(mode==='day') return 'Gün ' + (dayIndex+1);
+  if(mode==='known') return 'Bildiklerim';
+  if(mode==='unknown') return 'Bilmediklerim';
+  if(mode==='remaining') return 'Kalanlar';
+  return 'Tüm kartlar';
+}
+
+function renderStudyProgress(){
+  const done = sessionTotal - queue.length;
+  const pct = sessionTotal ? Math.round(done/sessionTotal*100) : 100;
+  $('sFill').style.width = pct + '%';
+  $('sbar').setAttribute('aria-valuenow', String(pct));
+  $('studyTitle').textContent = titleFor();
+}
+
+function renderCard(){
+  const id = queue[0];
+  const body = $('studyBody'), done = $('done');
+  $('undo').disabled = history.length===0;
+  renderStudyProgress();
+  if(!id){
+    stopAutoPlay();
+    body.hidden = true; done.hidden = false;
+    $('doneNext').hidden = true;
+    if(mode==='day'){
+      const info = dayInfo(dayIndex);
+      $('doneTitle').textContent = 'Gün ' + (dayIndex+1) + (info.status==='done' ? ' tamamlandı!' : ' bitti.');
+      $('doneText').textContent = info.known + ' tanesini biliyorsun, ' + info.unknown + ' tanesini bilmiyorsun.' + (info.unknown>0 ? ' Bilmediklerin ayrı bir listede birikti.' : '');
+      const n = totalDays();
+      if(dayIndex+1 < n){
+        $('doneNext').hidden = false;
+        $('doneNext').textContent = 'Gün ' + (dayIndex+2) + '’ye geç';
+        nextDayAction = function(){ openDay(dayIndex+1); };
+      }
+      $('doneAll').textContent = 'Yol’a dön';
+      doneAction = backToPath;
+    }else if(mode==='unknown'){
+      $('doneTitle').textContent = 'Bilmediğin kart kalmadı.';
+      $('doneText').textContent = 'Hepsini gözden geçirdin.';
+      $('doneAll').textContent = 'Yol’a dön';
+      doneAction = backToPath;
+    }else if(mode==='known'){
+      $('doneTitle').textContent = sessionTotal===0 ? 'Henüz tekrar edecek kelimen yok.' : ('Bildiğin ' + sessionTotal + ' kelimeyi tekrar ettin.');
+      $('doneText').textContent = sessionTotal===0 ? 'Önce birkaç kartı “Biliyorum” diye işaretle.' : 'Unuttuğun bir kart varsa “Bilmiyorum” diyebilirsin, bilmediklerim listesine geçer.';
+      $('doneAll').textContent = 'Yol’a dön';
+      doneAction = backToPath;
+    }else{
+      $('doneTitle').textContent = 'Bu destedeki tüm kartları biliyorsun.';
+      $('doneText').textContent = 'Unutmamak için arada tekrar et.';
+      $('doneAll').textContent = 'Yol’a dön';
+      doneAction = backToPath;
+    }
+    return;
+  }
+  body.hidden = false; done.hidden = true;
+  const c = byId.get(id);
+  const frontIsEn = state.front==='en';
+  const frontText = frontIsEn ? c.en : c.tr;
+  const backText = frontIsEn ? c.tr : c.en;
+
+  resetFlip();
+  $('fMark').textContent = frontText;
+  $('fWord').dataset.size = sizeOf(frontText);
+  $('bWas').textContent = frontText;
+  $('bWord').textContent = backText;
+  $('bWord').dataset.size = sizeOf(backText);
+
+  const exEl = $('bExample');
+  if(c.ex){
+    exEl.hidden = false;
+    exEl.textContent = '“' + c.ex + '”';
+  }else{
+    exEl.hidden = true;
+  }
+
+  const lvl = 'Level ' + c.lv, num = '#' + c.n;
+  $('fLvl').textContent = lvl; $('fNum').textContent = num;
+  $('bLvl').textContent = lvl; $('bNum').textContent = num;
+  setChip($('fChip'), state.status[id]);
+  setChip($('bChip'), state.status[id]);
+  const canSpeak = ('speechSynthesis' in window);
+  $('fSpeak').hidden = !(canSpeak && frontIsEn);
+  $('bSpeak').hidden = !(canSpeak && !frontIsEn);
+  $('left').textContent = 'Sırada ' + queue.length + ' kart';
+
+  if(isAutoPlaying){
+    processAutoPlayStep();
+  }
+}
+
+let toastTimer = null;
+function showToast(msg){
+  const t = $('toast');
+  t.textContent = msg;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.hidden = true; }, 4500);
+}
+
+function renderSettings(){
+  document.querySelectorAll('[data-key="front"],[data-key="shuffle"],[data-key="snow"]').forEach(function(b){
+    const key=b.dataset.key, val=b.dataset.value;
+    let cur = key==='shuffle' ? (state.shuffle?'on':'off') : key==='snow' ? (state.snow?'on':'off') : state[key];
+    b.setAttribute('aria-pressed', String(cur===val));
+  });
+  document.querySelectorAll('[data-goal]').forEach(function(b){
+    b.setAttribute('aria-pressed', String(Number(b.dataset.goal)===state.goal));
+  });
+  const gi = $('goalInput');
+  if(document.activeElement!==gi) gi.value = state.goal;
+  $('goalNote').textContent = 'Yol, destedeki kelimeleri bu sayıya göre günlere böler; toplam ' + totalDays() + ' gün olur.';
+  $('snowNote').hidden = !reduceMotion;
+
+  const autoSpeedEl = $('autoSpeed');
+  if(autoSpeedEl) autoSpeedEl.value = state.autoSpeed || 0.9;
+  const autoDelayEl = $('autoDelay');
+  if(autoDelayEl) autoDelayEl.value = state.autoDelay || 3000;
+}
+
+function renderAll(){
+  $('pathScreen').hidden = screen!=='path';
+  $('study').hidden = screen!=='study';
+  if(screen==='path') renderPath(); else renderCard();
+  renderSettings();
+}
+
+function speak(text, lang='en-GB', onEnd=null){
+  if(!('speechSynthesis' in window)){
+    if(onEnd) onEnd();
+    return;
+  }
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/\s*\/\s*/g, ', ').replace(/[()]/g, ''));
+    u.lang = lang; 
+    u.rate = state.autoSpeed || 0.9;
+    if(onEnd){
+      u.onend = onEnd;
+      u.onerror = onEnd;
+    }
+    window.speechSynthesis.speak(u);
+  }catch(e){
+    if(onEnd) onEnd();
+  }
+}
+
+function speakCurrent(){
+  const c = byId.get(queue[0]);
+  if(c) speak(c.en);
+}
+
+function processAutoPlayStep(){
+  clearTimeout(autoTimer);
+  if(!isAutoPlaying || !queue.length) return;
+
+  const c = byId.get(queue[0]);
+  if(!c) return;
+
+  const frontIsEn = state.front === 'en';
+  const firstText = frontIsEn ? c.en : c.tr;
+  const firstLang = frontIsEn ? 'en-GB' : 'tr-TR';
+
+  const secondText = frontIsEn ? c.tr : c.en;
+  const secondLang = frontIsEn ? 'tr-TR' : 'en-GB';
+
+  speak(firstText, firstLang, function(){
+    if(!isAutoPlaying) return;
+    autoTimer = setTimeout(function(){
+      if(!isAutoPlaying) return;
+      if(!flipped) flip();
+      
+      speak(secondText, secondLang, function(){
+        if(!isAutoPlaying) return;
+        autoTimer = setTimeout(function(){
+          if(!isAutoPlaying) return;
+          commit('k');
+        }, 1200);
+      });
+    }, state.autoDelay || 3000);
+  });
+}
+
+function startAutoPlay(){
+  if(!queue.length) return;
+  isAutoPlaying = true;
+  updateAutoPlayUI();
+  processAutoPlayStep();
+}
+
+function stopAutoPlay(){
+  isAutoPlaying = false;
+  clearTimeout(autoTimer);
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  updateAutoPlayUI();
+}
+
+function updateAutoPlayUI(){
+  const btn = $('autoPlayBtn');
+  const label = $('autoPlayLabel');
+  const icon = $('autoPlayIcon');
+  if(!btn) return;
+  if(isAutoPlaying){
+    btn.classList.add('active');
+    label.textContent = 'Durdur';
+    icon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+  }else{
+    btn.classList.remove('active');
+    label.textContent = 'Dinle';
+    icon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
+  }
+}
+
+$('autoPlayBtn').addEventListener('click', function(){
+  if(isAutoPlaying) stopAutoPlay();
+  else startAutoPlay();
+});
+
+$('autoSpeed').addEventListener('change', function(e){
+  state.autoSpeed = parseFloat(e.target.value);
+  save();
+});
+
+$('autoDelay').addEventListener('change', function(e){
+  state.autoDelay = parseInt(e.target.value, 10);
+  save();
+});
+
+function applyMark(kind){
+  const id = queue[0];
+  const h = {id:id, prev:state.status[id], queue:queue.slice()};
+  queue.shift();
+  state.status[id] = kind;
+  history.push(h);
+  if(history.length>30) history.shift();
+  save();
+  if(mode==='day' && queue.length===0){
+    const info = dayInfo(dayIndex);
+    if(info.status==='done') showToast('Gün ' + (dayIndex+1) + ' tamamlandı! ' + info.known + ' kelime öğrendin.');
+  }
+  renderAll();
+}
+
+function clearDrag(){
+  stage.style.transition = '';
+  stage.style.transform = '';
+  stage.style.opacity = '';
+  stage.dataset.drag = '';
+  stage.style.setProperty('--pk','0');
+  stage.style.setProperty('--pu','0');
+}
+
+function commit(kind){
+  if(busy || !queue.length) return;
+  busy = true;
+  const dir = kind==='k' ? 1 : -1;
+  function finish(){
+    clearDrag();
+    applyMark(kind);
+    busy = false;
+    if(!reduceMotion && screen==='study'){
+      stage.classList.remove('enter'); void stage.offsetWidth; stage.classList.add('enter');
+    }
+  }
+  if(reduceMotion){ finish(); return; }
+  stage.style.transition = 'transform .2s ease-in, opacity .2s ease-in';
+  stage.style.transform = 'translateX(' + (dir*120) + '%) rotate(' + (dir*8) + 'deg)';
+  stage.style.opacity = '0';
+  setTimeout(finish, 200);
+}
+
+function undo(){
+  if(busy) return;
+  stopAutoPlay();
+  const h = history.pop();
+  if(!h) return;
+  queue = h.queue;
+  if(h.prev===undefined) delete state.status[h.id]; else state.status[h.id] = h.prev;
+  save();
+  renderAll();
+}
+
+let drag = null;
+stage.addEventListener('pointerdown', function(e){
+  if(busy || !queue.length) return;
+  if(e.target.closest && e.target.closest('.speak')) return;
+  drag = {x:e.clientX, y:e.clientY, dx:0, moved:false, id:e.pointerId};
+});
+stage.addEventListener('pointermove', function(e){
+  if(!drag || e.pointerId!==drag.id) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  if(!drag.moved && Math.abs(dx)>10 && Math.abs(dx)>Math.abs(dy)){
+    drag.moved = true;
+    try{ stage.setPointerCapture(e.pointerId); }catch(err){}
+  }
+  if(drag.moved){
+    drag.dx = dx;
+    stage.style.transition = 'none';
+    stage.style.transform = 'translateX(' + dx + 'px) rotate(' + (dx/25) + 'deg)';
+    stage.dataset.drag = dx>40 ? 'k' : dx<-40 ? 'u' : '';
+    const p = Math.min(1, Math.abs(dx)/90);
+    stage.style.setProperty('--pk', dx>0 ? p : 0);
+    stage.style.setProperty('--pu', dx<0 ? p : 0);
+  }
+});
+function endDrag(e, cancelled){
+  if(!drag || e.pointerId!==drag.id) return;
+  const d = drag; drag = null;
+  if(d.moved){
+    if(!cancelled && Math.abs(d.dx) > 90){ 
+      stopAutoPlay();
+      commit(d.dx>0 ? 'k' : 'u'); 
+    }
+    else{
+      stage.style.transition = 'transform .2s ease-out';
+      stage.style.transform = '';
+      stage.dataset.drag = '';
+      stage.style.setProperty('--pk','0');
+      stage.style.setProperty('--pu','0');
+    }
+  }else if(!cancelled){
+    flip();
+  }
+}
+stage.addEventListener('pointerup', function(e){ endDrag(e,false); });
+stage.addEventListener('pointercancel', function(e){ endDrag(e,true); });
+
+$('fSpeak').addEventListener('click', function(e){ e.stopPropagation(); speakCurrent(); });
+$('bSpeak').addEventListener('click', function(e){ e.stopPropagation(); speakCurrent(); });
+$('btnK').addEventListener('click', function(){ stopAutoPlay(); commit('k'); });
+$('btnU').addEventListener('click', function(){ stopAutoPlay(); commit('u'); });
+$('undo').addEventListener('click', undo);
+$('backToPath').addEventListener('click', backToPath);
+$('doneRepeat').addEventListener('click', function(){ openDay(dayIndex); });
+$('doneAll').addEventListener('click', function(){ if(doneAction) doneAction(); });
+$('doneNext').addEventListener('click', function(){ if(nextDayAction) nextDayAction(); });
+
+document.addEventListener('keydown', function(e){
+  if(e.metaKey || e.ctrlKey || e.altKey) return;
+  if(screen!=='study') return;
+  const t = e.target, tag = t && t.tagName;
+  if(tag==='SELECT' || tag==='INPUT' || tag==='TEXTAREA') return;
+  if(e.key==='ArrowRight'){ stopAutoPlay(); commit('k'); e.preventDefault(); }
+  else if(e.key==='ArrowLeft'){ stopAutoPlay(); commit('u'); e.preventDefault(); }
+  else if(e.key==='z' || e.key==='Z'){ undo(); }
+  else if((e.key===' ' || e.key==='Enter') && t===card){ flip(); e.preventDefault(); }
+  else if(e.key===' ' && tag!=='BUTTON'){ flip(); e.preventDefault(); }
+});
+
+document.querySelectorAll('[data-key="deck"]').forEach(function(b){
+  b.addEventListener('click', function(){
+    state.deck = b.dataset.value;
+    currentPage = 1;
+    save();
+    renderAll();
+  });
+});
+$('goKnown').addEventListener('click', function(){ openMode('known'); });
+$('goUnknown').addEventListener('click', function(){ openMode('unknown'); });
+
+function setSettings(open){
+  $('settings').hidden = !open;
+  $('gear').setAttribute('aria-expanded', String(open));
+}
+$('gear').addEventListener('click', function(){
+  const open = $('settings').hidden;
+  setSettings(open);
+  if(open) $('settings').scrollIntoView({block:'nearest'});
+});
+
+$('addWordBtn').addEventListener('click', function(){
+  const lvl = parseInt($('addWordLvl').value, 10);
+  const en = $('addWordEn').value.trim();
+  const tr = $('addWordTr').value.trim();
+  const ex = $('addWordEx').value.trim();
+
+  if(!en || !tr){
+    window.alert('Lütfen hem İngilizce hem Türkçe karşılığını girin.');
+    return;
+  }
+
+  const nextNum = (state.customWords || []).length + 1000;
+  const newRow = [lvl, nextNum, en, tr, ex];
+
+  state.customWords = state.customWords || [];
+  state.customWords.push(newRow);
+  save();
+
+  rebuildCards();
+  $('addWordEn').value = '';
+  $('addWordTr').value = '';
+  $('addWordEx').value = '';
+  showToast('Yeni kelime eklendi: ' + en);
+  renderAll();
+});
+
+document.querySelectorAll('[data-key="front"],[data-key="shuffle"],[data-key="snow"]').forEach(function(b){
+  b.addEventListener('click', function(){
+    const k = b.dataset.key, v = b.dataset.value;
+    if(k==='shuffle') state.shuffle = (v==='on');
+    else if(k==='snow') state.snow = (v==='on');
+    else state[k] = v;
+    save();
+    if(k==='snow'){ applySnow(); renderSettings(); return; }
+    if(screen==='study') buildQueue();
+    renderAll();
+  });
+});
+
+function setGoal(n){
+  n = Math.max(1, Math.min(500, Math.round(n) || 1));
+  state.goal = n;
+  currentPage = 1;
+  save();
+  renderAll();
+}
+document.querySelectorAll('[data-goal]').forEach(function(b){
+  b.addEventListener('click', function(){ setGoal(Number(b.dataset.goal)); });
+});
+$('goalInput').addEventListener('change', function(){
+  const v = parseInt($('goalInput').value, 10);
+  if(v>=1) setGoal(v);
+  else $('goalInput').value = state.goal;
+});
+
+function encodeState(s){ return btoa(unescape(encodeURIComponent(JSON.stringify(s)))); }
+function decodeState(str){ return JSON.parse(decodeURIComponent(escape(atob(str.trim())))); }
+$('backupBtn').addEventListener('click', function(){
+  const box = $('backupBox');
+  box.value = encodeState(state);
+  box.hidden = false;
+  $('backupCopy').hidden = false;
+  box.focus(); box.select();
+  try{
+    navigator.clipboard.writeText(box.value).then(function(){ showToast('Yedek kodu oluşturuldu ve kopyalandı.'); });
+  }catch(e){}
+});
+$('backupCopy').addEventListener('click', function(){
+  const box = $('backupBox');
+  box.hidden = false; box.focus(); box.select();
+  let ok = false;
+  try{ document.execCommand('copy'); ok = true; }catch(e){}
+  if(!ok){ try{ navigator.clipboard.writeText(box.value); ok = true; }catch(e){} }
+  showToast(ok ? 'Kod kopyalandı.' : 'Kopyalanamadı, kutudan elle seçip kopyalayabilirsin.');
+});
+$('restoreBtn').addEventListener('click', function(){
+  const input = window.prompt('Yedek kodunu buraya yapıştır:');
+  if(!input) return;
+  try{
+    const parsed = decodeState(input);
+    if(!parsed || typeof parsed!=='object' || !parsed.status){ window.alert('Kod geçersiz görünüyor.'); return; }
+    state = Object.assign({status:{}, deck:'all', front:'en', shuffle:true, goal:25, snow:true, customWords:[], ver:3, autoSpeed:0.9, autoDelay:3000}, parsed);
+    save();
+    rebuildCards();
+    screen = 'path';
+    renderAll();
+    applySnow();
+    showToast('İlerleme geri yüklendi.');
+  }catch(e){
+    window.alert('Kod okunamadı. Kopyaladığın kodun eksiksiz olduğundan emin ol.');
+  }
+});
+
+(function(){
+  const btn = $('reset');
+  let armed = false, timer = null;
+  const label = btn.textContent;
+  btn.addEventListener('click', function(){
+    if(!armed){
+      armed = true;
+      btn.textContent = 'Emin misin? Silmek için tekrar dokun';
+      timer = setTimeout(function(){ armed = false; btn.textContent = label; }, 4000);
+      return;
+    }
+    clearTimeout(timer);
+    armed = false;
+    btn.textContent = label;
+    state.status = {};
+    state.customWords = [];
+    save();
+    rebuildCards();
+    screen = 'path';
+    renderAll();
+  });
+})();
+
+const cv = $('snow');
+const sctx = cv.getContext ? cv.getContext('2d') : null;
+let sw = 0, sh = 0, flakes = [], raf = 0, last = 0, sprite = null;
+function makeSprite(){
+  const s = document.createElement('canvas');
+  s.width = s.height = 64;
+  const c = s.getContext('2d');
+  const g = c.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,'rgba(255,255,255,1)');
+  g.addColorStop(0.4,'rgba(255,255,255,0.95)');
+  g.addColorStop(0.7,'rgba(240,246,255,0.55)');
+  g.addColorStop(1,'rgba(230,240,255,0)');
+  c.fillStyle = g;
+  c.fillRect(0,0,64,64);
+  return s;
+}
+function newFlake(init){
+  const r = 3 + Math.random()*7;
+  return {x:Math.random()*sw, y:init ? Math.random()*sh : -r*2, r:r,
+    vy:0.35 + r*0.1 + Math.random()*0.35, ph:Math.random()*6.28, sp:0.004 + Math.random()*0.01,
+    amp:0.25 + Math.random()*0.6, a:0.55 + Math.random()*0.4};
+}
+function fitSnow(){
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  sw = window.innerWidth; sh = window.innerHeight;
+  cv.width = Math.round(sw*dpr); cv.height = Math.round(sh*dpr);
+  sctx.setTransform(dpr,0,0,dpr,0,0);
+  const n = Math.max(24, Math.min(60, Math.round(sw*sh/20000)));
+  flakes = [];
+  for(let i=0;i<n;i++) flakes.push(newFlake(true));
+}
+function snowStep(dt, t){
+  sctx.clearRect(0,0,sw,sh);
+  const wind = Math.sin(t/5000)*0.25;
+  for(let i=0;i<flakes.length;i++){
+    const f = flakes[i];
+    if(dt>0){
+      f.ph += f.sp*dt*3;
+      f.x += (Math.sin(f.ph)*f.amp + wind)*dt;
+      f.y += f.vy*dt;
+      if(f.y > sh + f.r*2){ f.y = -f.r*2; f.x = Math.random()*sw; }
+      if(f.x < -20) f.x = sw + 20;
+      if(f.x > sw + 20) f.x = -20;
+    }
+    sctx.globalAlpha = f.a;
+    sctx.drawImage(sprite, f.x-f.r, f.y-f.r, f.r*2, f.r*2);
+  }
+  sctx.globalAlpha = 1;
+}
+function snowLoop(t){
+  const dt = Math.min(3, (t-last)/16.67 || 1);
+  last = t;
+  snowStep(dt, t);
+  raf = requestAnimationFrame(snowLoop);
+}
+function applySnow(){
+  if(!sctx) return;
+  cancelAnimationFrame(raf); raf = 0;
+  if(!state.snow){ cv.style.display = 'none'; return; }
+  cv.style.display = 'block';
+  if(!sprite) sprite = makeSprite();
+  fitSnow();
+  if(reduceMotion){ snowStep(0,0); }
+  else{ last = performance.now(); raf = requestAnimationFrame(snowLoop); }
+}
+let resizeTimer = null;
+window.addEventListener('resize', function(){
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(function(){ if(state.snow && sctx) applySnow(); }, 150);
+});
+
+let deferredInstall = null;
+function isStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function isiOS(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent || '');
+}
+function setInstallNote(){
+  $('installNote2').textContent = isStandalone()
+    ? 'Zaten uygulama olarak kurulu.'
+    : isiOS()
+      ? 'iPhone’da: Paylaş simgesine dokun, sonra “Ana Ekrana Ekle” seçeneğini seç.'
+      : 'Aşağıdaki Yükle butonuna dokun; tarayıcı izin verirse doğrudan kurar.';
+}
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  deferredInstall = e;
+  if(!isStandalone()){ $('installHint').hidden = false; }
+});
+function doInstall(){
+  if(deferredInstall){
+    deferredInstall.prompt();
+    deferredInstall.userChoice.finally(function(){ deferredInstall = null; $('installHint').hidden = true; });
+  }else if(isiOS()){
+    window.alert('Paylaş simgesine dokun, sonra "Ana Ekrana Ekle" seçeneğini seç.');
+  }else{
+    window.alert('Tarayıcının menüsünden "Ana ekrana ekle" veya "Uygulama yükle" seçeneğini kullanabilirsin.');
+  }
+}
+$('installBtn').addEventListener('click', doInstall);
+$('installBtn2').addEventListener('click', doInstall);
+window.addEventListener('appinstalled', function(){ $('installHint').hidden = true; });
+setInstallNote();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+
+if(!storageOk) $('noStore').hidden = false;
+save();
+renderAll();
+applySnow();
+})();
+</script>
+</body>
+</html>
